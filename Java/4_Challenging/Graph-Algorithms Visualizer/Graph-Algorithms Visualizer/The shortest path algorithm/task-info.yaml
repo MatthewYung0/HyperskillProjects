@@ -1,0 +1,903 @@
+type: edu
+files:
+  - name: src/visualizer/ApplicationRunner.java
+    visible: true
+    text: |
+      package visualizer;
+      
+      public class ApplicationRunner {
+          public static void main(String[] args) {
+              new MainFrame();
+          }
+      }
+    learner_created: false
+  - name: src/visualizer/MainFrame.java
+    visible: true
+    text: |-
+      package visualizer;
+      
+      import javax.swing.*;
+      import java.awt.*;
+      import java.awt.event.MouseAdapter;
+      import java.awt.event.MouseEvent;
+      
+      public class MainFrame extends JFrame{
+      
+          private int mouseX = 0;
+          private int mouseY = 0;
+          private JPanel graph;
+          private MODE mode = MODE.NONE;
+          private MouseAdapter mouseAdapter;
+          private final String currentOptionString = "Current Mode -> ";
+          private final String addAVertexString = "Add a Vertex";
+          private final String addAnEdgeString = "Add an Edge";
+          private final String addNoneString = "None";
+          private JLabel currentMode;
+      
+          public MainFrame() {
+              setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+              setTitle("Graph-Algorithms Visualizer");
+              setSize(800, 600);
+              setLayout(null);
+              initGraph();
+              initMenu();
+              initMouseAdapter();
+              initCurrentMode();
+              setVisible(true);
+          }
+      
+          private void initCurrentMode() {
+              currentMode = new JLabel(currentOptionString + addAVertexString);
+              currentMode.setName("Mode");
+              currentMode.setForeground(Color.BLACK);
+              currentMode.setBounds(10,550,300,50);
+              add(currentMode);
+          }
+      
+          private void initMouseAdapter() {
+              mouseAdapter = new MouseAdapter() {
+                  @Override
+                  public void mouseClicked(MouseEvent mouseEvent) {
+                      super.mouseClicked(mouseEvent);
+                      mouseX = mouseEvent.getX();
+                      mouseY = mouseEvent.getY();
+                      switch (mode) {
+                          case ADD_VERTEX -> createVertex(getVertexID());
+                          case ADD_EDGE -> createEdge(getWeight());
+                      }
+                  }
+              };
+              graph.addMouseListener(mouseAdapter);
+          }
+      
+          private void initMenu() {
+              JMenuBar menuBar = new JMenuBar();
+              setJMenuBar(menuBar);
+              JMenu modeMenu = new JMenu("Mode");
+              menuBar.add(modeMenu);
+              initModeMenuItems(modeMenu);
+          }
+      
+          private void initModeMenuItems(JMenu modeMenu) {
+              // Creating JMenu items
+              JMenuItem addVertexMenuItem = new JMenuItem(addAVertexString);
+              JMenuItem addEdgeMenuItem = new JMenuItem(addAnEdgeString);
+              JMenuItem addNoneMenuItem = new JMenuItem(addNoneString);
+              addVertexMenuItem.setName(addAVertexString);
+              addEdgeMenuItem.setName(addAnEdgeString);
+              addNoneMenuItem.setName(addNoneString);
+              // Adding them to the Menu
+              modeMenu.add(addVertexMenuItem);
+              modeMenu.add(addEdgeMenuItem);
+              modeMenu.add(addNoneMenuItem);
+              // Changes the mode enum to the users selection
+              addVertexMenuItem.addActionListener(event -> {
+                  mode = MODE.ADD_VERTEX;
+                  setCurrentOption(MODE.ADD_VERTEX);
+              });
+              addEdgeMenuItem.addActionListener(event -> {
+                  mode = MODE.ADD_EDGE;
+                  setCurrentOption(MODE.ADD_EDGE);
+              });
+              addNoneMenuItem.addActionListener(event -> {
+                  mode = MODE.NONE;
+                  setCurrentOption(MODE.NONE);
+              });
+          }
+      
+          private void initGraph() {
+              graph = new JPanel();
+              graph.setName("Graph");
+              //graph.setBackground(Color.BLACK);
+              graph.setBackground(new Color(0, 0, 0, 0));
+              graph.setLayout(null);
+              graph.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+              graph.setSize(800, 600);
+              graph.addMouseListener(mouseAdapter);
+              this.add(graph);
+          }
+      
+          private void setCurrentOption(MODE mode) {
+              switch(mode) {
+                  case ADD_VERTEX -> currentMode.setText(currentOptionString + addAVertexString);
+                  case ADD_EDGE -> currentMode.setText(currentOptionString + addAnEdgeString);
+                  case NONE -> currentMode.setText(currentOptionString + addNoneString);
+              }
+          }
+      
+          private String getWeight() {
+              String weightNum = null;
+              boolean validInput = false;
+              while (!validInput) {
+                  // Prompt for weightNum
+                  weightNum = JOptionPane.showInputDialog(null, "Enter Weight:", "Input", JOptionPane.PLAIN_MESSAGE);
+                  if (weightNum == null) {
+                      // User clicked cancel
+                      return null;
+                  }
+                  if (Character.isDigit(weightNum.charAt(0))) {
+                      validInput = true;
+                  }
+              }
+              return weightNum;
+          }
+      
+          private void createEdge(String weightNum) {
+      
+          }
+      
+          private String getVertexID() {
+              String vertexID = null;
+              boolean validInput = false;
+              while (!validInput) {
+                  // Prompt for vertex ID
+                  vertexID = JOptionPane.showInputDialog(null, "Enter Vertex ID (Should be 1 char):", "Vertex", JOptionPane.PLAIN_MESSAGE);
+                  if (vertexID == null) {
+                      // User clicked cancel
+                      return null;
+                  }
+                  if (vertexID.length() == 1 && (Character.isLetter(vertexID.charAt(0)) || Character.isDigit(vertexID.charAt(0)))) {
+                      validInput = true;
+                  }
+              }
+              return vertexID;
+          }
+      
+          private void createVertex(String vertexID) {
+              Vertex vertex = new Vertex("Vertex " + vertexID, "VertexLabel " + vertexID, vertexID);
+              // Set vertex position
+              vertex.setBounds(mouseX-25, mouseY-25, 50, 50);
+              graph.add(vertex);
+              graph.repaint();
+          }
+      
+      
+      }
+    learner_created: false
+  - name: src/visualizer/Vertex.java
+    visible: true
+    text: |
+      package visualizer;
+      
+      import javax.swing.*;
+      import java.awt.*;
+      
+      public class Vertex extends JPanel {
+          private final String labelName;
+          private final String labelText;
+          private final int diameter = 50;
+      
+          public Vertex(String panelName, String labelName, String labelText) {
+              this.labelName = labelName;
+              this.labelText = labelText;
+              setName(panelName);
+              setPreferredSize(new Dimension(diameter,diameter));
+              setLayout(null);
+              createLabel();
+          }
+      
+          @Override
+          protected void paintComponent(Graphics g) {
+              super.paintComponent(g);
+              g.setColor(new Color(0, 0, 0, 0));
+              g.fillRect(0,0, diameter, diameter);
+              g.setColor(Color.BLACK);
+              g.fillOval(0, 0, diameter, diameter);
+          }
+      
+          public void createLabel() {
+              JLabel label = new JLabel(labelText);
+              label.setName(this.labelName);
+              label.setForeground(Color.WHITE);
+              label.setHorizontalAlignment(SwingConstants.CENTER);
+              label.setVerticalAlignment(SwingConstants.CENTER);
+              label.setBounds(0, 0, diameter, diameter); // Adjust label bounds to match the panel size
+              add(label);
+          }
+      }
+    learner_created: false
+  - name: src/visualizer/MODE.java
+    visible: true
+    text: |
+      package visualizer;
+      
+      public enum MODE {
+          ADD_VERTEX,
+          ADD_EDGE,
+          NONE
+      }
+    learner_created: false
+  - name: src/visualizer/Edge.java
+    visible: true
+    text: |
+      package visualizer;
+      
+      import javax.swing.*;
+      
+      public class Edge extends JComponent {
+      
+      }
+    learner_created: false
+  - name: test/GraphData.java
+    visible: false
+    text: |
+      import java.util.List;
+      
+      public interface GraphData {
+          List<Vertex> getVertices();
+      
+          List<Edge> getEdges();
+      
+          String getDFSText();
+      
+          String getBFSText();
+      
+          String getDijkstraText();
+      
+          String getSource();
+      }
+    learner_created: false
+  - name: test/GraphDataOne.java
+    visible: false
+    text: |
+      import java.awt.*;
+      import java.util.List;
+      
+      public class GraphDataOne implements GraphData {
+      
+          @Override
+          public List<Vertex> getVertices() {
+              return List.of(
+                      new Vertex("A", new Point(175, 359)),
+                      new Vertex("B", new Point(224, 176)),
+                      new Vertex("C", new Point(365, 363)),
+                      new Vertex("D", new Point(408, 67)),
+                      new Vertex("E", new Point(531, 235)),
+                      new Vertex("F", new Point(590, 64))
+              );
+          }
+      
+          @Override
+          public List<Edge> getEdges() {
+              return List.of(
+                      new Edge("A", "B", 1),
+                      new Edge("B", "D", 2),
+                      new Edge("D", "F", 3),
+                      new Edge("F", "E", 4),
+                      new Edge("E", "C", 5),
+                      new Edge("C", "A", 6),
+                      new Edge("B", "E", 7),
+                      new Edge("D", "C", 8),
+                      new Edge("B", "C", 9),
+                      new Edge("D", "E", 10)
+              );
+          }
+      
+          @Override
+          public String getDFSText() {
+              return "DFS : A -> B -> D -> F -> E -> C";
+          }
+      
+          @Override
+          public String getBFSText() {
+              return "BFS : A -> B -> C -> D -> E -> F";
+          }
+      
+          @Override
+          public String getDijkstraText() {
+              return "B=1, C=6, D=3, E=8, F=6";
+          }
+      
+          @Override
+          public String getSource() {
+              return "A";
+          }
+      }
+    learner_created: false
+  - name: test/GraphDataTwo.java
+    visible: false
+    text: |
+      import java.awt.*;
+      import java.util.List;
+      
+      public class GraphDataTwo implements GraphData {
+      
+          @Override
+          public List<Vertex> getVertices() {
+              return List.of(
+                      new Vertex("1", new Point(361, 54)),
+                      new Vertex("2", new Point(152, 164)),
+                      new Vertex("3", new Point(599, 155)),
+                      new Vertex("4", new Point(47, 394)),
+                      new Vertex("5", new Point(291, 392)),
+                      new Vertex("6", new Point(419, 390)),
+                      new Vertex("7", new Point(744, 392))
+              );
+          }
+      
+          @Override
+          public List<Edge> getEdges() {
+              return List.of(
+                      new Edge("1", "2", 1),
+                      new Edge("1", "3", 3),
+                      new Edge("2", "4", 5),
+                      new Edge("5", "2", 7),
+                      new Edge("6", "3", 9),
+                      new Edge("7", "3", 11)
+              );
+          }
+      
+          @Override
+          public String getDFSText() {
+              return "DFS : 1 -> 2 -> 4 -> 5 -> 3 -> 6 -> 7";
+          }
+      
+          @Override
+          public String getBFSText() {
+              return "BFS : 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7";
+          }
+      
+          @Override
+          public String getDijkstraText() {
+              return "2=1, 3=3, 4=6, 5=8, 6=12, 7=14";
+          }
+      
+          @Override
+          public String getSource() {
+              return "1";
+          }
+      }
+    learner_created: false
+  - name: test/ShortestPathAlgorithmTests.java
+    visible: false
+    text: |
+      import org.assertj.swing.exception.ComponentLookupException;
+      import org.assertj.swing.exception.WaitTimedOutError;
+      import org.assertj.swing.finder.JOptionPaneFinder;
+      import org.assertj.swing.fixture.JLabelFixture;
+      import org.assertj.swing.fixture.JMenuItemFixture;
+      import org.assertj.swing.fixture.JOptionPaneFixture;
+      import org.assertj.swing.fixture.JPanelFixture;
+      import org.hyperskill.hstest.common.Utils;
+      import org.hyperskill.hstest.dynamic.DynamicTest;
+      import org.hyperskill.hstest.exception.outcomes.WrongAnswer;
+      import org.hyperskill.hstest.stage.SwingTest;
+      import org.hyperskill.hstest.testcase.CheckResult;
+      import org.hyperskill.hstest.testing.swing.SwingComponent;
+      import visualizer.MainFrame;
+      
+      import javax.swing.*;
+      import java.awt.*;
+      import java.util.Objects;
+      import java.util.Optional;
+      import java.util.regex.Pattern;
+      
+      import static org.assertj.core.api.Assertions.assertThat;
+      import static org.hyperskill.hstest.testcase.CheckResult.correct;
+      
+      class Vertex {
+          private final String id;
+          private final Point point;
+      
+          Vertex(String id, Point point) {
+              this.id = id;
+              this.point = point;
+          }
+      
+          public static Vertex of(String id) {
+              return new Vertex(id, null);
+          }
+      
+          public Point point() {
+              return point;
+          }
+      
+          public String id() {
+              return id;
+          }
+      
+          public String name() {
+              return "Vertex " + id;
+          }
+      
+          public String labelName() {
+              return "VertexLabel " + id;
+          }
+      }
+      
+      class Edge {
+          private final String from;
+          private final String to;
+          private final int weight;
+      
+          public Edge(String from, String to, int weight) {
+              this.from = from;
+              this.to = to;
+              this.weight = weight;
+          }
+      
+          public static Edge of(String from, String to) {
+              return new Edge(from, to, 0);
+          }
+      
+          public String from() {
+              return from;
+          }
+      
+          public String to() {
+              return to;
+          }
+      
+          public int weight() {
+              return weight;
+          }
+      
+          public String name() {
+              return "Edge <" + from + " -> " + to + ">";
+          }
+      
+          public String labelName() {
+              return "EdgeLabel <" + from + " -> " + to + ">";
+          }
+      
+          public Edge opposite() {
+              return new Edge(this.to, this.from, this.weight);
+          }
+      }
+      
+      enum ComponentType {
+          VERTEX("Vertex "),
+          EDGE("Edge "),
+          EDGE_LABEL("EdgeLabel "),
+          VERTEX_LABEL("VertexLabel "),
+          ANY("");
+      
+          private final String prefix;
+      
+          ComponentType(String prefix) {
+              this.prefix = prefix;
+          }
+      
+          public String prefix() {
+              return prefix;
+          }
+      }
+      
+      @SuppressWarnings("unused")
+      public class ShortestPathAlgorithmTests extends SwingTest {
+      
+          @SwingComponent(name = "Graph")
+          private JPanelFixture graph;
+      
+          @SwingComponent(name = "Mode")
+          private JLabelFixture modeText;
+      
+          @SwingComponent(name = "Add a Vertex")
+          private JMenuItemFixture addAVertexMode;
+      
+          @SwingComponent(name = "Add an Edge")
+          private JMenuItemFixture addAnEdgeMode;
+      
+          @SwingComponent(name = "Remove a Vertex")
+          private JMenuItemFixture removeAVertexMode;
+      
+          @SwingComponent(name = "Remove an Edge")
+          private JMenuItemFixture removeAnEdgeMode;
+      
+          @SwingComponent(name = "New")
+          private JMenuItemFixture newMenuItem;
+      
+          @SwingComponent(name = "Exit")
+          private JMenuItemFixture exitMenuItem;
+      
+          @SwingComponent(name = "None")
+          private JMenuItemFixture noneMode;
+      
+          @SwingComponent(name = "Breadth-First Search")
+          private JMenuItemFixture breadthFirstSearch;
+      
+          @SwingComponent(name = "Depth-First Search")
+          private JMenuItemFixture depthFirstSearch;
+      
+          @SwingComponent(name = "Dijkstra's Algorithm")
+          private JMenuItemFixture dijkstraAlgorithm;
+      
+          @SwingComponent(name = "Display")
+          private JLabelFixture display;
+      
+          public ShortestPathAlgorithmTests() {
+              super(new MainFrame());
+          }
+      
+          @DynamicTest(order = 1, feedback = "Initially graph panel should not contain anything.")
+          CheckResult isEmptyGraph() {
+              assertThat(count(ComponentType.ANY))
+                      .isEqualTo(0);
+      
+              return correct();
+          }
+      
+          @DynamicTest(order = 2, feedback = "Initial Mode must be \"Add a Vertex\"")
+          CheckResult isCorrectCurrentMode() {
+              modeText.requireText(Pattern.compile(".*add a vertex.*", Pattern.CASE_INSENSITIVE));
+              return correct();
+          }
+      
+          void changeModeToAddAVertex() {
+              addAVertexMode.click();
+          }
+      
+          void insertVertex(Vertex vertex) {
+      
+              getWindow().robot().click(graph.target(), vertex.point());
+      
+              JOptionPaneFixture jOptionPaneFixture;
+              try {
+      
+                  jOptionPaneFixture = JOptionPaneFinder
+                          .findOptionPane()
+                          .withTimeout(200)
+                          .using(getWindow().robot());
+      
+              } catch (WaitTimedOutError e) {
+                  throw new WrongAnswer("Timeout waiting for a dialog box to open");
+              }
+      
+              try {
+      
+                  jOptionPaneFixture.textBox();
+      
+              } catch (ComponentLookupException e) {
+                  throw new WrongAnswer("A text box was not found inside the dialog box");
+              }
+      
+              try {
+      
+                  jOptionPaneFixture.okButton();
+      
+              } catch (ComponentLookupException e) {
+                  throw new WrongAnswer("A ok button was not found inside the dialog box");
+              }
+      
+              try {
+      
+                  jOptionPaneFixture.cancelButton();
+      
+              } catch (ComponentLookupException e) {
+                  throw new WrongAnswer("A cancel button was not found inside the dialog box");
+              }
+      
+              try {
+      
+                  jOptionPaneFixture.requireTitle(Pattern.compile("vertex", Pattern.CASE_INSENSITIVE));
+      
+              } catch (Exception ignore) {
+                  throw new WrongAnswer("Dialog box title should contain \"Vertex\"");
+              }
+      
+      
+              try {
+      
+                  jOptionPaneFixture
+                          .textBox()
+                          .setText(vertex.id());
+      
+                  jOptionPaneFixture
+                          .textBox()
+                          .requireText(vertex.id());
+              } catch (Exception e) {
+                  throw new WrongAnswer("Cannot write text '" + vertex.id() + "' in dialog box / Incorrect text after writing. Expected: '" + vertex.id() + "'");
+              }
+      
+              JOptionPaneFinder
+                      .findOptionPane()
+                      .using(getWindow().robot())
+                      .okButton()
+                      .click();
+      
+              try {
+      
+                  JOptionPaneFinder
+                          .findOptionPane()
+                          .withTimeout(200)
+                          .using(getWindow().robot());
+      
+                  throw new WrongAnswer("Dialog box did not disappear after clicking ok");
+              } catch (WaitTimedOutError ignored) {
+              }
+      
+              Optional<Component> vOp = getVertex(vertex.id());
+      
+              if (vOp.isEmpty()) {
+                  throw new WrongAnswer(vertex.name() + " was not created. It is not present in graph panel");
+              }
+      
+              if (!(vOp.get() instanceof JPanel)) {
+                  throw new WrongAnswer("Each Vertex should be represented by a JPanel.");
+              }
+      
+              JPanel v = (JPanel) vOp.get();
+      
+              if (v.getSize().getHeight() != 50 || v.getSize().getWidth() != 50) {
+                  Dimension expected = new Dimension(50, 50);
+                  Dimension got = v.getSize();
+                  throw new WrongAnswer("Incorrect Vertex Size. Expected: " + expected + ", Got: " + got);
+              }
+      
+              Optional<Component> vl = getVertexLabel(vertex.id());
+      
+              if (vl.isEmpty()) {
+                  throw new WrongAnswer("Label of " + vertex.name() + " is not Present.");
+              }
+      
+              if (!(vl.get() instanceof JLabel)) {
+                  throw new WrongAnswer("Each Vertex label must be represented by JLabel.");
+              }
+      
+              JLabel vLabel = (JLabel) vl.get();
+      
+              if (!Objects.equals(vLabel.getParent().getName(), vertex.name())) {
+                  throw new WrongAnswer("Each Label of each vertex must be present inside it.");
+              }
+      
+              if (!Objects.equals(vLabel.getText(), vertex.id())) {
+                  throw new WrongAnswer("Vertex Label Should Contain ID of Vertex");
+              }
+      
+              Point got = v.getLocation();
+              Point expected = new Point((int) (vertex.point().getX() - 25), (int) (vertex.point().getY() - 25));
+              if (!expected.equals(got)) {
+                  throw new WrongAnswer("Incorrect Position. Expected: " + expected + ", Got: " + got);
+              }
+      
+          }
+      
+          void changeModeToAddAnEdge() {
+              addAnEdgeMode.click();
+          }
+      
+          void insertEdge(Edge edge) {
+      
+      
+              getWindow().robot().click(getVertex(edge.from()).orElseThrow());
+              getWindow().robot().click(getVertex(edge.to()).orElseThrow());
+      
+              JOptionPaneFixture jOptionPaneFixture;
+      
+              try {
+                  jOptionPaneFixture = JOptionPaneFinder
+                          .findOptionPane()
+                          .withTimeout(1000)
+                          .using(getWindow().robot());
+              } catch (WaitTimedOutError e) {
+                  throw new WrongAnswer("Clicking on two vertices in the \"Add an Edge\" mode; a new window must pop up prompting for edge weight");
+              }
+      
+              try {
+                  jOptionPaneFixture.okButton();
+              } catch (ComponentLookupException e) {
+                  throw new WrongAnswer("A ok button was not found in edge weight prompting input box.");
+              }
+      
+              try {
+                  jOptionPaneFixture.cancelButton();
+              } catch (ComponentLookupException e) {
+                  throw new WrongAnswer("A cancel button was not found in edge weight prompting input box.");
+              }
+      
+              try {
+                  jOptionPaneFixture.textBox();
+              } catch (ComponentLookupException e) {
+                  throw new WrongAnswer("A text box was not found in edge weight prompting input box.");
+              }
+      
+              try {
+                  jOptionPaneFixture
+                          .textBox()
+                          .setText(edge.weight() + "");
+      
+                  jOptionPaneFixture
+                          .textBox()
+                          .requireText(edge.weight() + "");
+              } catch (Exception e) {
+                  throw new WrongAnswer("Could not enter text in the edge weight prompting dialog box.");
+              }
+      
+              jOptionPaneFixture
+                      .okButton()
+                      .click();
+      
+              try {
+                  JOptionPaneFinder
+                          .findOptionPane()
+                          .withTimeout(1000)
+                          .using(getWindow().robot());
+      
+                  throw new WrongAnswer("Dialog box must close after clicking on ok button.");
+              } catch (WaitTimedOutError ignored) {
+              }
+      
+              Component aTob = getEdge(edge.from(), edge.to()).orElseThrow(() -> new WrongAnswer("\"" + edge.labelName() + "\" was not found!"));
+      
+              Component bToa = getEdge(edge.to(), edge.from()).orElseThrow(() -> new WrongAnswer("\"" + edge.opposite().labelName() + "\" was not found!"));
+      
+              Component label = getEdgeLabel(edge.from(), edge.to()).orElseThrow(() -> new WrongAnswer("Edge Label which should contain the edge weight was not found in graph."));
+      
+              if (!(aTob instanceof JComponent) || !(bToa instanceof JComponent))
+                  throw new WrongAnswer("Edge must be represented by JComponent");
+      
+              if (!(label instanceof JLabel))
+                  throw new WrongAnswer("EdgeLabel must be represented by JLabel");
+      
+              if (!Objects.equals(graph.target(), label.getParent()))
+                  throw new WrongAnswer("Parent of each edge label is the graph itself not the edge.");
+      
+      
+              try {
+                  assertThat(((JLabel) label).getText())
+                          .containsIgnoringCase(edge.weight() + "");
+              } catch (Exception e) {
+                  throw new WrongAnswer("Edge Label should hold the weight of the respective edge");
+              }
+      
+      
+          }
+      
+          void checkVertexCount(Vertex[] vertices) {
+              int got = count(ComponentType.VERTEX);
+              int expected = vertices.length;
+              if (expected != got)
+                  throw new WrongAnswer("Incorrect Vertex Count. Expected = " + expected + ", Got = " + got);
+      
+          }
+      
+          void checkEdgeCount(Edge[] edges) {
+              int got = count(ComponentType.EDGE);
+              int expected = edges.length * 2;
+              if (expected != got)
+                  throw new WrongAnswer("Incorrect Edge Count. Expected = " + expected + ", Got = " + got);
+      
+          }
+      
+          void checkVertexLabelCount(Vertex[] vertices) {
+              int got = count(ComponentType.VERTEX_LABEL);
+              int expected = vertices.length;
+              if (expected != got)
+                  throw new WrongAnswer("Incorrect Vertex Label (id) Count. Expected = " + expected + ", Got = " + got);
+          }
+      
+          void checkEdgeLabelCount(Edge[] edges) {
+              int got = count(ComponentType.EDGE_LABEL);
+              int expected = edges.length;
+              if (expected != got)
+                  throw new WrongAnswer("Incorrect Edge Label Count. Expected = " + expected + ", Got = " + got);
+          }
+      
+          GraphData[] graphs = new GraphData[]{new GraphDataOne(), new GraphDataTwo()};
+      
+          @DynamicTest(order = 3, data = "graphs", feedback = "Error while running / trying to run graph traversal algorithms")
+          CheckResult checkGraphTraversal(GraphData data) {
+      
+              Vertex[] vertices = data.getVertices().toArray(new Vertex[0]);
+              Edge[] edges = data.getEdges().toArray(new Edge[0]);
+      
+              this.changeModeToAddAVertex();
+      
+              for (Vertex v : vertices) {
+                  insertVertex(v);
+              }
+      
+              this.changeModeToAddAnEdge();
+      
+              for (Edge e : edges) {
+                  insertEdge(e);
+              }
+      
+              checkVertexCount(vertices);
+              checkEdgeCount(edges);
+              checkVertexLabelCount(vertices);
+              checkEdgeLabelCount(edges);
+      
+              runAlgorithm(data, dijkstraAlgorithm, data.getDijkstraText());
+      
+              newMenuItem.click();
+      
+              return correct();
+          }
+      
+          private void runAlgorithm(GraphData data, JMenuItemFixture algo, String answer) {
+              algo.click();
+      
+              if (!display.text().contains("Please choose a starting vertex"))
+                  throw new WrongAnswer("Display label should show \"Please choose a starting vertex\" if an algorithm is selected for execution.");
+      
+              getWindow().robot().click(getVertex(data.getSource()).orElseThrow(() -> new WrongAnswer("Vertex disappeared after creation.")));
+      
+              if (!modeText.text().matches(".*None.*"))
+                  throw new WrongAnswer("Mode after selecting an algorithm should be \"None\".");
+      
+              if (!display.text().contains("Please wait..."))
+                  throw new WrongAnswer("Display label should show \"Please wait...\" after selecting source / while the algorithm is executing.");
+      
+              int totalTime = 0;
+              while (display.text().contains("Please wait...")) {
+                  if (totalTime > 60000) {
+                      throw new WrongAnswer("Algorithm Running for more than 1 min");
+                  }
+                  Utils.sleep(100);
+                  totalTime += 100;
+              }
+      
+              if (!display.text().contains(answer))
+                  throw new WrongAnswer("Wrong Answer in " + algo.target().getName() + "." + " Expected: " + answer + ", Got: " + display.text());
+          }
+      
+          private int count(ComponentType type) {
+              return (int) getAllComponents(graph.target())
+                      .stream()
+                      .filter(it -> it.getName() != null && it.getName().startsWith(type.prefix()))
+                      .count();
+          }
+      
+          private Optional<Component> getVertexLabel(String id) {
+              String name = Vertex.of(id).labelName();
+      
+              return getAllComponents(graph.target())
+                      .stream()
+                      .filter(it -> Objects.equals(it.getName(), name))
+                      .findFirst();
+      
+          }
+      
+          private Optional<Component> getEdgeLabel(String from, String to) {
+              String name = Edge.of(from, to).labelName();
+      
+              return getAllComponents(graph.target())
+                      .stream()
+                      .filter(it -> Objects.equals(it.getName(), name))
+                      .findFirst();
+      
+          }
+      
+          private Optional<Component> getEdge(String from, String to) {
+              String name = Edge.of(from, to).name();
+      
+              return getAllComponents(graph.target())
+                      .stream()
+                      .filter(it -> Objects.equals(it.getName(), name))
+                      .findFirst();
+          }
+      
+          private Optional<Component> getVertex(String id) {
+              String name = Vertex.of(id).name();
+      
+              return getAllComponents(graph.target())
+                      .stream()
+                      .filter(it -> Objects.equals(name, it.getName()))
+                      .findFirst();
+          }
+      }
+    learner_created: false
+feedback_link: https://hyperskill.org/projects/207/stages/1037/implement#comment
+status: Unchecked
+record: -1

@@ -1,0 +1,1568 @@
+type: edu
+files:
+  - name: src/visualizer/ApplicationRunner.java
+    visible: true
+    text: |
+      package visualizer;
+      
+      public class ApplicationRunner {
+          public static void main(String[] args) {
+              new MainFrame();
+          }
+      }
+    learner_created: false
+  - name: src/visualizer/MainFrame.java
+    visible: true
+    text: |-
+      package visualizer;
+      
+      import javax.swing.*;
+      import java.awt.*;
+      import java.awt.event.MouseAdapter;
+      import java.awt.event.MouseEvent;
+      
+      public class MainFrame extends JFrame{
+      
+          private int mouseX = 0;
+          private int mouseY = 0;
+          private JPanel graph;
+          private MODE mode = MODE.NONE;
+          private MouseAdapter mouseAdapter;
+          private final String currentOptionString = "Current Mode -> ";
+          private final String addAVertexString = "Add a Vertex";
+          private final String addAnEdgeString = "Add an Edge";
+          private final String addNoneString = "None";
+          private JLabel currentMode;
+      
+          public MainFrame() {
+              setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+              setTitle("Graph-Algorithms Visualizer");
+              setSize(800, 600);
+              setLayout(null);
+              initGraph();
+              initMenu();
+              initMouseAdapter();
+              initCurrentMode();
+              setVisible(true);
+          }
+      
+          private void initCurrentMode() {
+              currentMode = new JLabel(currentOptionString + addAVertexString);
+              currentMode.setName("Mode");
+              currentMode.setForeground(Color.BLACK);
+              currentMode.setBounds(10,550,300,50);
+              add(currentMode);
+          }
+      
+          private void initMouseAdapter() {
+              mouseAdapter = new MouseAdapter() {
+                  @Override
+                  public void mouseClicked(MouseEvent mouseEvent) {
+                      super.mouseClicked(mouseEvent);
+                      mouseX = mouseEvent.getX();
+                      mouseY = mouseEvent.getY();
+                      switch (mode) {
+                          case ADD_VERTEX -> createVertex(getVertexID());
+                          case ADD_EDGE -> createEdge(getWeight());
+                      }
+                  }
+              };
+              graph.addMouseListener(mouseAdapter);
+          }
+      
+          private void initMenu() {
+              JMenuBar menuBar = new JMenuBar();
+              setJMenuBar(menuBar);
+              JMenu modeMenu = new JMenu("Mode");
+              menuBar.add(modeMenu);
+              initModeMenuItems(modeMenu);
+          }
+      
+          private void initModeMenuItems(JMenu modeMenu) {
+              // Creating JMenu items
+              JMenuItem addVertexMenuItem = new JMenuItem(addAVertexString);
+              JMenuItem addEdgeMenuItem = new JMenuItem(addAnEdgeString);
+              JMenuItem addNoneMenuItem = new JMenuItem(addNoneString);
+              addVertexMenuItem.setName(addAVertexString);
+              addEdgeMenuItem.setName(addAnEdgeString);
+              addNoneMenuItem.setName(addNoneString);
+              // Adding them to the Menu
+              modeMenu.add(addVertexMenuItem);
+              modeMenu.add(addEdgeMenuItem);
+              modeMenu.add(addNoneMenuItem);
+              // Changes the mode enum to the users selection
+              addVertexMenuItem.addActionListener(event -> {
+                  mode = MODE.ADD_VERTEX;
+                  setCurrentOption(MODE.ADD_VERTEX);
+              });
+              addEdgeMenuItem.addActionListener(event -> {
+                  mode = MODE.ADD_EDGE;
+                  setCurrentOption(MODE.ADD_EDGE);
+              });
+              addNoneMenuItem.addActionListener(event -> {
+                  mode = MODE.NONE;
+                  setCurrentOption(MODE.NONE);
+              });
+          }
+      
+          private void initGraph() {
+              graph = new JPanel();
+              graph.setName("Graph");
+              //graph.setBackground(Color.BLACK);
+              graph.setBackground(new Color(0, 0, 0, 0));
+              graph.setLayout(null);
+              graph.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+              graph.setSize(800, 600);
+              graph.addMouseListener(mouseAdapter);
+              this.add(graph);
+          }
+      
+          private void setCurrentOption(MODE mode) {
+              switch(mode) {
+                  case ADD_VERTEX -> currentMode.setText(currentOptionString + addAVertexString);
+                  case ADD_EDGE -> currentMode.setText(currentOptionString + addAnEdgeString);
+                  case NONE -> currentMode.setText(currentOptionString + addNoneString);
+              }
+          }
+      
+          private String getWeight() {
+              String weightNum = null;
+              boolean validInput = false;
+              while (!validInput) {
+                  // Prompt for weightNum
+                  weightNum = JOptionPane.showInputDialog(null, "Enter Weight:", "Input", JOptionPane.PLAIN_MESSAGE);
+                  if (weightNum == null) {
+                      // User clicked cancel
+                      return null;
+                  }
+                  if (Character.isDigit(weightNum.charAt(0))) {
+                      validInput = true;
+                  }
+              }
+              return weightNum;
+          }
+      
+          private void createEdge(String weightNum) {
+      
+          }
+      
+          private String getVertexID() {
+              String vertexID = null;
+              boolean validInput = false;
+              while (!validInput) {
+                  // Prompt for vertex ID
+                  vertexID = JOptionPane.showInputDialog(null, "Enter Vertex ID (Should be 1 char):", "Vertex", JOptionPane.PLAIN_MESSAGE);
+                  if (vertexID == null) {
+                      // User clicked cancel
+                      return null;
+                  }
+                  if (vertexID.length() == 1 && (Character.isLetter(vertexID.charAt(0)) || Character.isDigit(vertexID.charAt(0)))) {
+                      validInput = true;
+                  }
+              }
+              return vertexID;
+          }
+      
+          private void createVertex(String vertexID) {
+              Vertex vertex = new Vertex("Vertex " + vertexID, "VertexLabel " + vertexID, vertexID);
+              // Set vertex position
+              vertex.setBounds(mouseX-25, mouseY-25, 50, 50);
+              graph.add(vertex);
+              graph.repaint();
+          }
+      
+      
+      }
+    learner_created: false
+  - name: src/visualizer/Vertex.java
+    visible: true
+    text: |
+      package visualizer;
+      
+      import javax.swing.*;
+      import java.awt.*;
+      
+      public class Vertex extends JPanel {
+          private final String labelName;
+          private final String labelText;
+          private final int diameter = 50;
+      
+          public Vertex(String panelName, String labelName, String labelText) {
+              this.labelName = labelName;
+              this.labelText = labelText;
+              setName(panelName);
+              setPreferredSize(new Dimension(diameter,diameter));
+              setLayout(null);
+              createLabel();
+          }
+      
+          @Override
+          protected void paintComponent(Graphics g) {
+              super.paintComponent(g);
+              g.setColor(new Color(0, 0, 0, 0));
+              g.fillRect(0,0, diameter, diameter);
+              g.setColor(Color.BLACK);
+              g.fillOval(0, 0, diameter, diameter);
+          }
+      
+          public void createLabel() {
+              JLabel label = new JLabel(labelText);
+              label.setName(this.labelName);
+              label.setForeground(Color.WHITE);
+              label.setHorizontalAlignment(SwingConstants.CENTER);
+              label.setVerticalAlignment(SwingConstants.CENTER);
+              label.setBounds(0, 0, diameter, diameter); // Adjust label bounds to match the panel size
+              add(label);
+          }
+      }
+    learner_created: false
+  - name: src/visualizer/MODE.java
+    visible: true
+    text: |
+      package visualizer;
+      
+      public enum MODE {
+          ADD_VERTEX,
+          ADD_EDGE,
+          NONE
+      }
+    learner_created: false
+  - name: src/visualizer/Edge.java
+    visible: true
+    text: |
+      package visualizer;
+      
+      import javax.swing.*;
+      
+      public class Edge extends JComponent {
+      
+      }
+    learner_created: false
+  - name: test/_1_InitialTests.java
+    visible: false
+    text: |
+      import org.assertj.swing.exception.WaitTimedOutError;
+      import org.assertj.swing.finder.WindowFinder;
+      import org.assertj.swing.fixture.JLabelFixture;
+      import org.assertj.swing.fixture.JMenuItemFixture;
+      import org.assertj.swing.fixture.JPanelFixture;
+      import org.hyperskill.hstest.dynamic.DynamicTest;
+      import org.hyperskill.hstest.exception.outcomes.WrongAnswer;
+      import org.hyperskill.hstest.stage.SwingTest;
+      import org.hyperskill.hstest.testcase.CheckResult;
+      import org.hyperskill.hstest.testing.swing.SwingComponent;
+      import visualizer.MainFrame;
+      
+      import static org.hyperskill.hstest.testcase.CheckResult.correct;
+      import static org.hyperskill.hstest.testcase.CheckResult.wrong;
+      
+      @SuppressWarnings("unused")
+      public class _1_InitialTests extends SwingTest {
+      
+        @SwingComponent
+        JPanelFixture graph;
+      
+        @SwingComponent(name = "Exit")
+        JMenuItemFixture exitMenuItem;
+      
+        @SwingComponent(name = "Add a Vertex")
+        JMenuItemFixture addVertexMenuItem;
+      
+        @SwingComponent(name = "Add an Edge")
+        JMenuItemFixture addEdgeMenuItem;
+      
+        @SwingComponent(name = "Remove a Vertex")
+        JMenuItemFixture removeVertexMenuItem;
+      
+        @SwingComponent(name = "Remove an Edge")
+        JMenuItemFixture removeEdgeMenuItem;
+      
+        @SwingComponent(name = "None")
+        JMenuItemFixture noneMenuItem;
+      
+        @SwingComponent(name = "Mode")
+        JLabelFixture mode;
+      
+        public _1_InitialTests() {
+          super(new MainFrame());
+        }
+      
+        @DynamicTest(order = 1, feedback = "Either title (Expected: \"Graph-Algorithms Visualizer\") or " +
+            "the dimension of the frame (Expected: 800 x 600) is incorrect")
+        CheckResult checkTitleAndDimension() {
+          if (!frame.getTitle().equals("Graph-Algorithms Visualizer"))
+            throw new WrongAnswer("Title of the frame must be \"Graph-Algorithms Visualizer\" " +
+                "but instead got - \"" + frame.getTitle() + "\"");
+          if (!(frame.getHeight() == 600 && frame.getWidth() == 800)) {
+            throw new WrongAnswer("Frame Dimension should be (w=800, h=600)");
+          }
+          return correct();
+        }
+      
+        @DynamicTest(order = 2, feedback = "Could not check components. " +
+            "Make sure there's no components in the graph initially")
+        CheckResult checkForEmptyGraphPanel() {
+          return TestingUtils.assertComponentCount(graph, 0);
+        }
+      
+        @DynamicTest(order = 3, feedback = "Could not change mode.")
+        CheckResult checkForModeChanges() {
+          addVertexMenuItem.click();
+          modeCheck("Add a Vertex");
+      
+          removeVertexMenuItem.click();
+          modeCheck("Remove a Vertex");
+      
+          addEdgeMenuItem.click();
+          modeCheck("Add an Edge");
+      
+          removeEdgeMenuItem.click();
+          modeCheck("Remove an Edge");
+      
+          noneMenuItem.click();
+          modeCheck("None");
+      
+          return correct();
+        }
+      
+        @DynamicTest(order = 4)
+        CheckResult exitCheck() {
+          exitMenuItem.click();
+          try {
+            var frameFixture = WindowFinder
+                .findFrame("Graph-Algorithms Visualizer")
+                .withTimeout(200)
+                .using(getWindow().robot());
+          } catch (WaitTimedOutError e) {
+            return correct();
+          }
+          return wrong("Window is not closed after clicking on the exit menu item.");
+        }
+      
+        private void modeCheck(String text) {
+          var msg = "After clicking on \"%s\" Menu Item, the mode (JLabel) should should be \"%s\". Got : \"%s\"";
+      
+          if (mode.text() == null || !mode.text().contains(text))
+            throw new WrongAnswer(String.format(msg, text, text, mode.text()));
+        }
+      }
+    learner_created: false
+  - name: test/_2_VertexTests.java
+    visible: false
+    text: |
+      import org.assertj.swing.core.Robot;
+      import org.assertj.swing.exception.ComponentLookupException;
+      import org.assertj.swing.exception.WaitTimedOutError;
+      import org.assertj.swing.finder.JOptionPaneFinder;
+      import org.assertj.swing.fixture.JLabelFixture;
+      import org.assertj.swing.fixture.JMenuItemFixture;
+      import org.assertj.swing.fixture.JOptionPaneFixture;
+      import org.assertj.swing.fixture.JPanelFixture;
+      import org.hyperskill.hstest.dynamic.DynamicTest;
+      import org.hyperskill.hstest.exception.outcomes.WrongAnswer;
+      import org.hyperskill.hstest.stage.SwingTest;
+      import org.hyperskill.hstest.testcase.CheckResult;
+      import org.hyperskill.hstest.testing.swing.SwingComponent;
+      import visualizer.MainFrame;
+      
+      import javax.swing.*;
+      import java.awt.*;
+      import java.util.List;
+      
+      import static org.hyperskill.hstest.testcase.CheckResult.correct;
+      
+      @SuppressWarnings("unused")
+      public class _2_VertexTests extends SwingTest {
+      
+        @SwingComponent
+        JPanelFixture graph;
+      
+        @SwingComponent(name = "New")
+        JMenuItemFixture newMenuItem;
+      
+        @SwingComponent(name = "Mode")
+        JLabelFixture mode;
+      
+        @SwingComponent(name = "Add a Vertex")
+        JMenuItemFixture addVertexMenuItem;
+      
+        @SwingComponent(name = "Add an Edge")
+        JMenuItemFixture addEdgeMenuItem;
+      
+        @SwingComponent(name = "Remove a Vertex")
+        JMenuItemFixture removeVertexMenuItem;
+      
+        @SwingComponent(name = "Remove an Edge")
+        JMenuItemFixture removeEdgeMenuItem;
+      
+        @SwingComponent(name = "None")
+        JMenuItemFixture noneMenuItem;
+      
+        public _2_VertexTests() {
+          super(new MainFrame());
+        }
+      
+        @DynamicTest(order = 5)
+        CheckResult checkDialogAppearing() {
+          addVertexMenuItem.click();
+          graph.click();
+      
+          try {
+      
+            testDialog("");
+            testDialog("123");
+            testDialog("ABC");
+            cancelDialog();
+            graph.click();
+            testDialog("0");
+      
+          } catch (WaitTimedOutError wt) {
+            throw new WrongAnswer("Could not find a dialog box after clicking on the graph panel.");
+          } catch (ComponentLookupException cl) {
+            throw new WrongAnswer("A ok button, cancel button and a text field must be present inside the dialog");
+          } catch (IllegalStateException e) {
+            throw new WrongAnswer("Either the text field is disabled or it is not showing on the screen.");
+          } catch (Exception e) {
+            throw new WrongAnswer("Something went wrong. Please read the instructions carefully and try again.");
+          }
+      
+          return TestingUtils.assertComponentCount(graph, 1);
+        }
+      
+        @DynamicTest(order = 6)
+        CheckResult addVertices() {
+          for (var pos : getVertexTestingPositions()) {
+            assertSuccessfulVertexInsertion(graph,
+                pos.getX(),
+                pos.getY(),
+                pos.getId(),
+                getWindow().robot());
+          }
+          return correct();
+        }
+      
+        @DynamicTest(order = 7)
+        CheckResult checkComponentsAfterVertexInsertions() {
+          return TestingUtils.assertComponentCount(graph, 8);
+        }
+      
+        @DynamicTest(order = 8, feedback = "There's a problem with VertexLabel (JLabel)")
+        CheckResult checkVertexLabels() {
+          int flag = 0;
+          for (var component : getAllComponents(graph.target())) {
+            if (component instanceof JLabel && component.getName().startsWith("VertexLabel ")) {
+              var labelName = component.getName().replace("VertexLabel ", "");
+              var componentName = component.getParent().getName().replace("Vertex ", "");
+              if (!(labelName.equals(componentName))) {
+                throw new WrongAnswer("All of the vertices must contain " +
+                    "a JLabel with name as \"VertexLabel <id>\" and text as \"<id>\" in it.");
+              }
+              if (!component.getParent().getName().startsWith("Vertex "))
+                throw new WrongAnswer("All VertexLabel must be inside of Vertex (JPanel)");
+              flag++;
+            }
+          }
+          if (flag != getVertexTestingPositions().size() + 1) {
+            throw new WrongAnswer("All of the vertices must contain " +
+                "a JLabel with name as \"VertexLabel <id>\" and text as \"<id>\" in it.");
+          }
+          return correct();
+        }
+      
+        @DynamicTest(order = 9, feedback = "Graph panel should be empty after clicking on new menu item (JMenuItem)")
+        CheckResult checkForEmptyGraphAfterClickingNewMenuItem() {
+          newMenuItem.click();
+      
+          if (mode.text() == null && !mode.text().contains("Add a Vertex"))
+            throw new WrongAnswer("Mode should be \"Add a Vertex\" after " +
+                "clicking on new menu item. Found : " + mode.text());
+      
+          if (graph.target().getComponents().length != 0)
+            throw new WrongAnswer("Graph panel should not contain anything " +
+                "after clicking on new menu item. Found : " + graph.target().getComponents().length);
+      
+          return correct();
+        }
+      
+        @DynamicTest(order = 10)
+        CheckResult checkVertexInsertionInNoneMode() {
+          noneMenuItem.click();
+          return checkVertexInsertionInOtherModes();
+        }
+      
+        @DynamicTest(order = 11)
+        CheckResult checkVertexInsertionInAddEdgeMode() {
+          addEdgeMenuItem.click();
+          return checkVertexInsertionInOtherModes();
+        }
+      
+        @DynamicTest(order = 12)
+        CheckResult checkVertexInsertionInRemoveEdgeMode() {
+          removeEdgeMenuItem.click();
+          return checkVertexInsertionInOtherModes();
+        }
+      
+        @DynamicTest(order = 13)
+        CheckResult checkVertexInsertionInRemoveVertexMode() {
+          removeVertexMenuItem.click();
+          return checkVertexInsertionInOtherModes();
+        }
+      
+        private CheckResult checkVertexInsertionInOtherModes() {
+          getWindow().robot().click(graph.target(), new Point(100, 200));
+          try {
+            JOptionPaneFinder
+                .findOptionPane()
+                .withTimeout(200)
+                .using(getWindow().robot());
+            throw new WrongAnswer("Vertex adding process should only " +
+                "be initiated in \"Add a Vertex\" mode. Current Mode: " + mode.text());
+          } catch (WaitTimedOutError e) {
+            return correct();
+          }
+        }
+      
+        public static List<Vertex> getVertexTestingPositions() {
+          return List.of(
+              new Vertex(116, 108, "1"),
+              new Vertex(579, 238, "9"),
+              new Vertex(671, 91, "A"),
+              new Vertex(290, 309, "H"),
+              new Vertex(581, 360, "N"),
+              new Vertex(551, 72, "Y"),
+              new Vertex(698, 249, "Z")
+          );
+        }
+      
+        public static void assertSuccessfulVertexInsertion(JPanelFixture graph, int x, int y, String id, Robot robot) {
+          robot.click(graph.target(), new Point(x, y));
+          JOptionPaneFixture dialog;
+          try {
+            dialog = TestingUtils.getOptionPaneFixture(robot);
+          } catch (WaitTimedOutError e) {
+            throw new WrongAnswer(e.getMessage());
+          }
+      
+          dialog
+              .textBox()
+              .setText(id);
+      
+          if (!dialog.textBox().text().equals(id))
+            throw new WrongAnswer(
+                String.format("Content of the text field inside the dialog box must be " +
+                    "filled with the content after filling. Expected: \"%s\", Got: \"%s\"", id, dialog.textBox().text()));
+      
+          dialog
+              .okButton()
+              .click();
+      
+      
+          boolean flag = false;
+          var feedbackText = String.format("Graph Panel should contain a vertex with name \"Vertex %s\" " +
+              "after a successful insertion.", id);
+      
+          for (var vertex : getAllComponents(graph.target())) {
+            if (vertex.getName().equals("Vertex " + id) && vertex instanceof JComponent) {
+              if (!(vertex.getX() == (x - 25) && vertex.getY() == (y - 25)))
+                throw new WrongAnswer(
+                    String.format("Incorrect position of Vertex %s -> (%d, %d), Expected position -> (%s, %s).",
+                        id, vertex.getX(), vertex.getY(), x, y));
+              flag = true;
+              break;
+            }
+          }
+          if (!flag)
+            throw new WrongAnswer(feedbackText);
+        }
+      
+        private void cancelDialog() {
+          JOptionPaneFixture dialog;
+          try {
+            dialog = TestingUtils.getOptionPaneFixture(getWindow().robot());
+          } catch (WaitTimedOutError e) {
+            throw new WrongAnswer(e.getMessage());
+          }
+      
+          dialog.cancelButton().click();
+        }
+      
+        private void testDialog(String s) {
+          JOptionPaneFixture dialog;
+          try {
+            dialog = TestingUtils.getOptionPaneFixture(getWindow().robot());
+          } catch (WaitTimedOutError e) {
+            throw new WrongAnswer(e.getMessage());
+          }
+      
+          dialog.textBox()
+              .setText(s);
+      
+          dialog.okButton().click();
+        }
+      }
+    learner_created: false
+  - name: test/_3_EdgesTests.java
+    visible: false
+    text: |
+      import org.assertj.swing.exception.WaitTimedOutError;
+      import org.assertj.swing.fixture.JLabelFixture;
+      import org.assertj.swing.fixture.JMenuItemFixture;
+      import org.assertj.swing.fixture.JOptionPaneFixture;
+      import org.assertj.swing.fixture.JPanelFixture;
+      import org.hyperskill.hstest.dynamic.DynamicTest;
+      import org.hyperskill.hstest.exception.outcomes.TestPassed;
+      import org.hyperskill.hstest.exception.outcomes.WrongAnswer;
+      import org.hyperskill.hstest.stage.SwingTest;
+      import org.hyperskill.hstest.testcase.CheckResult;
+      import org.hyperskill.hstest.testing.swing.SwingComponent;
+      import visualizer.MainFrame;
+      
+      import javax.swing.*;
+      import java.util.HashMap;
+      import java.util.List;
+      import java.util.Map;
+      
+      import static org.hyperskill.hstest.testcase.CheckResult.correct;
+      import static org.hyperskill.hstest.testcase.CheckResult.wrong;
+      
+      @SuppressWarnings("unused")
+      public class _3_EdgesTests extends SwingTest {
+      
+        @SwingComponent
+        JPanelFixture graph;
+      
+        @SwingComponent(name = "Mode")
+        JLabelFixture mode;
+      
+        @SwingComponent(name = "Add a Vertex")
+        JMenuItemFixture addVertexMenuItem;
+      
+        @SwingComponent(name = "Add an Edge")
+        JMenuItemFixture addEdgeMenuItem;
+      
+        @SwingComponent(name = "Remove a Vertex")
+        JMenuItemFixture removeVertexMenuItem;
+      
+        @SwingComponent(name = "Remove an Edge")
+        JMenuItemFixture removeEdgeMenuItem;
+      
+        @SwingComponent(name = "None")
+        JMenuItemFixture noneMenuItem;
+      
+        public _3_EdgesTests() {
+          super(new MainFrame());
+        }
+      
+        public static List<Vertex> getEdgeTestingVertexPositions() {
+          return List.of(
+              new Vertex(175, 359, "A"),
+              new Vertex(224, 176, "B"),
+              new Vertex(365, 363, "C"),
+              new Vertex(408, 67, "D"),
+              new Vertex(531, 235, "E"),
+              new Vertex(590, 64, "F")
+          );
+        }
+      
+        @DynamicTest(feedback = "Could not insert vertices")
+        CheckResult addVerticesForTestingEdges() {
+          addVertexMenuItem.click();
+      
+          for (var v : getEdgeTestingVertexPositions()) {
+            _2_VertexTests.assertSuccessfulVertexInsertion(graph, v.getX(), v.getY(), v.getId(), getWindow().robot());
+          }
+          return correct();
+        }
+      
+        public static Map<String, Vertex> getVertexEdgeTestingPositionsAsMap() {
+          Map<String, Vertex> map = new HashMap<>();
+          for (var item : getEdgeTestingVertexPositions()) {
+            map.put(item.getId(), item);
+          }
+          return map;
+        }
+      
+        public static List<Edge> getEdgeTestingPositions() {
+          return List.of(
+              new Edge("A", "B", 1),
+              new Edge("B", "D", 2),
+              new Edge("D", "F", 3),
+              new Edge("F", "E", 4),
+              new Edge("E", "C", 5),
+              new Edge("C", "A", 6),
+              new Edge("B", "E", 7),
+              new Edge("D", "C", 8),
+              new Edge("B", "C", 9),
+              new Edge("D", "E", 10)
+          );
+        }
+      
+        @DynamicTest(order = 14, feedback = "Error while adding edges")
+        CheckResult test15() {
+          var map = getVertexEdgeTestingPositionsAsMap();
+          var target = graph.target();
+      
+          addEdgeMenuItem.click();
+      
+          for (var e : getEdgeTestingPositions()) {
+      
+            var v = e.getFrom();
+            var u = e.getTo();
+      
+            var fixtureV = getVertexPanelFixture(map, target, v);
+            var fixtureU = getVertexPanelFixture(map, target, u);
+            fixtureV.click();
+            fixtureU.click();
+      
+            var dialog = TestingUtils.getOptionPaneFixture(getWindow().robot());
+            dialog.textBox().setText(e.getWeight() + "");
+            dialog.okButton().click();
+      
+            checkEdge(v, u, true);
+            checkEdge(u, v, true);
+            checkEdgeLabel(v, u, e.getWeight(), true);
+          }
+      
+          return correct();
+        }
+      
+        @DynamicTest(order = 15)
+        CheckResult componentCountCheckupAfterAddingEdges() {
+          return TestingUtils.assertComponentCount(
+              graph,
+              getEdgeTestingVertexPositions().size() +
+                  3 * getEdgeTestingPositions().size()
+          );
+        }
+      
+        @DynamicTest(order = 16, feedback = "Inclusion of Edges Error")
+        CheckResult checkInclusionOfEdgesInIncorrectModes() {
+          Map<String, Vertex> map = getVertexEdgeTestingPositionsAsMap();
+          var target = graph.target();
+      
+          try {
+      
+            removeVertexMenuItem.click();
+            tryToIncludeTwoArbitraryEdges(map, target);
+      
+            noneMenuItem.click();
+            tryToIncludeTwoArbitraryEdges(map, target);
+      
+            removeEdgeMenuItem.click();
+            tryToIncludeTwoArbitraryEdges(map, target);
+          } catch (WaitTimedOutError e) {
+            throw new TestPassed();
+          }
+      
+          return wrong("Edges can only be added in \"Add an Edge\" mode. Found Mode : " + mode.text());
+        }
+      
+        private JPanelFixture getVertexPanelFixture(Map<String, Vertex> map, JPanel target, String v) {
+          return new JPanelFixture(getWindow().robot(), (JPanel) target.getComponentAt(map.get(v).asPoint()));
+        }
+      
+        private void checkEdgeLabel(String v, String u, int weight, boolean value) {
+          boolean foundEdgeLabel = false;
+          for (var e : getAllComponents(graph.target())) {
+            if (e.getName() == null)
+              throw new WrongAnswer("Every component in the application must have a name. Component : " + e);
+            if (e.getName().equals(String.format("EdgeLabel <%s -> %s>", v, u))) {
+              foundEdgeLabel = true;
+              var text = ((JLabel) e).getText();
+              if (!text.equals(weight + ""))
+                throw new WrongAnswer(String.format("EdgeLabel <%s -> %s> was expected " +
+                    "to have weight %s but found %s", v, u, weight, text));
+            }
+          }
+      
+          String edgeMessage;
+      
+          if (value) {
+            edgeMessage = "EdgeLabel (JLabel) with name \"EdgeLabel <%s -> %s>\" " +
+                "must be placed in the graph panel after successful edge insertion";
+          } else {
+            edgeMessage = "EdgeLabel can be inserted in \"Add an Edge\" mode only.";
+          }
+      
+          if (foundEdgeLabel != value)
+            throw new WrongAnswer(String.format(edgeMessage, v, u));
+        }
+      
+        private void checkEdge(String v, String u, boolean value) {
+          boolean foundEdge = false;
+          for (var e : getAllComponents(graph.target())) {
+            if (e.getName() == null)
+              throw new WrongAnswer("Every component in the application must have a name. Component : " + e);
+            if (e.getName().equals(String.format("Edge <%s -> %s>", v, u))) {
+              foundEdge = true;
+            }
+          }
+      
+          String edgeMessage;
+      
+          if (value) {
+            edgeMessage = "Edge (JPanel) with name \"Edge <%s -> %s>\" " +
+                "must be placed in the graph panel after successful insertion.";
+          } else {
+            edgeMessage = "Edges can be inserted in \"Add an Edge\" mode only.";
+          }
+      
+          if (foundEdge != value)
+            throw new WrongAnswer(String.format(edgeMessage, v, u));
+        }
+      
+        private void tryToIncludeTwoArbitraryEdges(Map<String, Vertex> map, JPanel target) {
+          var v = "A";
+          var u = "D";
+          var a = "C";
+          var b = "F";
+      
+          addEdges(map, target, v, u, a, b);
+          checkEdgeLabel(v, u, 1, false);
+          checkEdgeLabel(a, b, 2, false);
+          checkEdge(u, v, false);
+          checkEdge(v, u, false);
+          checkEdge(a, b, false);
+          checkEdge(b, a, false);
+        }
+      
+        private void addEdges(Map<String, Vertex> map, JPanel target, String v, String u, String a, String b) {
+          JOptionPaneFixture dialog;
+          dialog = TestingUtils.getOptionPaneFixture(getWindow().robot());
+      
+          dialog.textBox().setText(1 + "");
+          dialog.okButton().click();
+      
+          var fixtureV = getVertexPanelFixture(map, target, v);
+          var fixtureU = getVertexPanelFixture(map, target, u);
+          fixtureV.click();
+          fixtureU.click();
+      
+          dialog = TestingUtils.getOptionPaneFixture(getWindow().robot());
+          dialog.textBox().setText(2 + "");
+          dialog.okButton().click();
+      
+          var fixtureA = getVertexPanelFixture(map, target, a);
+          var fixtureB = getVertexPanelFixture(map, target, b);
+          fixtureA.click();
+          fixtureB.click();
+        }
+      }
+    learner_created: false
+  - name: test/_4_RemoveVertexEdgeTests.java
+    visible: false
+    text: |
+      import org.assertj.swing.fixture.JLabelFixture;
+      import org.assertj.swing.fixture.JMenuItemFixture;
+      import org.assertj.swing.fixture.JPanelFixture;
+      import org.hyperskill.hstest.dynamic.DynamicTest;
+      import org.hyperskill.hstest.exception.outcomes.WrongAnswer;
+      import org.hyperskill.hstest.stage.SwingTest;
+      import org.hyperskill.hstest.testcase.CheckResult;
+      import org.hyperskill.hstest.testing.swing.SwingComponent;
+      import visualizer.MainFrame;
+      
+      import java.util.ArrayList;
+      import java.util.List;
+      import java.util.Objects;
+      
+      @SuppressWarnings("unused")
+      public class _4_RemoveVertexEdgeTests extends SwingTest {
+      
+        @SwingComponent
+        private JPanelFixture graph;
+      
+        @SwingComponent(name = "Mode")
+        JLabelFixture mode;
+      
+        @SwingComponent(name = "Add a Vertex")
+        JMenuItemFixture addVertexMenuItem;
+      
+        @SwingComponent(name = "Add an Edge")
+        JMenuItemFixture addEdgeMenuItem;
+      
+        @SwingComponent(name = "Remove a Vertex")
+        JMenuItemFixture removeVertexMenuItem;
+      
+        @SwingComponent(name = "Remove an Edge")
+        JMenuItemFixture removeEdgeMenuItem;
+      
+        private final List<Vertex> vertices = new ArrayList<>(List.of(
+            new Vertex(386, 221, "0"),
+            new Vertex(211, 216, "1"),
+            new Vertex(245, 92, "2"),
+            new Vertex(372, 28, "3"),
+            new Vertex(512, 81, "4"),
+            new Vertex(543, 215, "5"),
+            new Vertex(499, 345, "6"),
+            new Vertex(372, 407, "7"),
+            new Vertex(233, 349, "8")
+        ));
+      
+        private final List<Edge> edges = new ArrayList<>(List.of(
+            new Edge("0", "1", 1),
+            new Edge("0", "2", 1),
+            new Edge("0", "3", 2),
+            new Edge("0", "4", 3),
+            new Edge("0", "5", 4),
+            new Edge("0", "6", 5),
+            new Edge("0", "7", 6),
+            new Edge("0", "8", 7),
+            new Edge("1", "2", 3),
+            new Edge("2", "3", 4),
+            new Edge("3", "4", 5),
+            new Edge("4", "5", 6),
+            new Edge("5", "6", 7),
+            new Edge("6", "7", 3),
+            new Edge("7", "8", 4),
+            new Edge("8", "1", 5)
+        ));
+      
+        public _4_RemoveVertexEdgeTests() {
+          super(new MainFrame());
+        }
+      
+        @DynamicTest(order = 17, feedback = "Could not insert vertices")
+        CheckResult insertVertices() {
+          addVertexMenuItem.click();
+          for (var v : vertices) {
+            _2_VertexTests.assertSuccessfulVertexInsertion(graph, v.getX(), v.getY(), v.getId(), getWindow().robot());
+          }
+          return CheckResult.correct();
+        }
+      
+        @DynamicTest(order = 18, feedback = "Could not insert edges")
+        CheckResult insertEdges() {
+          addEdgeMenuItem.click();
+          TestingUtils.addEdge(edges, graph, getWindow().robot());
+          return CheckResult.correct();
+        }
+      
+        @DynamicTest(order = 19, feedback = "Could not Remove an Edge <8 -> 1> or Edge <4 -> 5>")
+        CheckResult removeTwoEdges() {
+          removeEdgeMenuItem.click();
+          var edge_8_1 = getEdge("8", "1").getMidPoint(getVertex("8").asPoint(), getVertex("1").asPoint());
+          var edge_5_6 = getEdge("4", "5").getMidPoint(getVertex("4").asPoint(), getVertex("5").asPoint());
+          getWindow().robot().click(graph.target().getComponentAt(edge_8_1));
+          getWindow().robot().click(graph.target().getComponentAt(edge_5_6));
+          return CheckResult.correct();
+        }
+      
+        @DynamicTest(order = 20, feedback = "Edge still exists in the graph (JPanel) after removing them.")
+        CheckResult checkRemoveTwoEdges() {
+          var msg = " still exists in the graph after removing.";
+          var edgeNameFormat = "Edge <%d -> %d>";
+          var edge_8_1 = String.format(edgeNameFormat, 8, 1);
+          var edge_1_8 = String.format(edgeNameFormat, 1, 8);
+          var edge_4_5 = String.format(edgeNameFormat, 4, 5);
+          var edge_5_4 = String.format(edgeNameFormat, 5, 4);
+      
+          for (var c : getAllComponents(graph.target())) {
+            if (Objects.equals(edge_8_1, c.getName()) || Objects.equals(edge_1_8, c.getName()))
+              throw new WrongAnswer(edge_8_1 + " or " + edge_1_8 + msg);
+      
+            if (Objects.equals(edge_4_5, c.getName()) || Objects.equals(edge_5_4, c.getName()))
+              throw new WrongAnswer(edge_4_5 + " or " + edge_5_4 + msg);
+          }
+      
+          edges.removeIf(e -> (e.getFrom().equals("8") && e.getTo().equals("1")) ||
+              (e.getFrom().equals("4") && e.getTo().equals("5")));
+      
+          return CheckResult.correct();
+        }
+      
+        @DynamicTest(order = 21, feedback = "Wrong number of components in Graph")
+        CheckResult validateNumberOfComponents() {
+          return TestingUtils.assertComponentCount(graph,
+              vertices.size() + 3 * edges.size());
+        }
+      
+        @DynamicTest(order = 22, feedback = "Could not delete vertices")
+        CheckResult deleteTwoVertices() {
+          removeVertexMenuItem.click();
+          var vertex_0 = getVertex("0").asPoint();
+          var vertex_7 = getVertex("7").asPoint();
+          getWindow().robot().click(graph.target().getComponentAt(vertex_0));
+          getWindow().robot().click(graph.target().getComponentAt(vertex_7));
+          return CheckResult.correct();
+        }
+      
+        @DynamicTest(order = 23, feedback = "All of the in and out edges of the vertex must be deleted along with the vertices")
+        CheckResult checkDeleteResult() {
+          var feedbackText = "Already deleted Vertex %s is present in the graph.";
+          for (var c : getAllComponents(graph.target())) {
+      
+            if (Objects.equals("Vertex " + 0, c.getName())) {
+              throw new WrongAnswer(String.format(feedbackText, 0));
+            } else if (Objects.equals("Vertex " + 7, c.getName())) {
+              throw new WrongAnswer(String.format(feedbackText, 7));
+            } else if (c.getName().matches("Edge <0 -> .>") ||
+                c.getName().matches("Edge <. -> 0>") ||
+                c.getName().matches("Edge <7 -> .>") ||
+                c.getName().matches("Edge <. -> 7>")) {
+              throw new WrongAnswer("In or Out edges of the deleted vertex shall be removed too.");
+            }
+          }
+      
+          vertices.removeIf(v -> v.getId().equals("7") || v.getId().equals("0"));
+      
+          edges.removeIf(e -> e.getFrom().equals("0") ||
+              e.getTo().equals("0") ||
+              e.getFrom().equals("7") ||
+              e.getTo().equals("7"));
+      
+          return CheckResult.correct();
+        }
+      
+        @DynamicTest(order = 24, feedback = "Incorrect number of components in graph after deleting edges and vertices")
+        CheckResult componentCheckAfterRemove() {
+          return TestingUtils.assertComponentCount(graph, vertices.size() + 3 * edges.size());
+        }
+      
+        @DynamicTest(order = 25, feedback = "Error removing vertex and edges")
+        CheckResult deleteAllComponents() {
+          var robot = getWindow().robot();
+          for (var v : vertices) {
+            robot.click(graph.target().getComponentAt(v.asPoint()));
+          }
+      
+          for (var e : edges) {
+            robot.click(graph.target()
+                .getComponentAt(
+                    e.getMidPoint(
+                        getVertex(e.getFrom())
+                            .asPoint(),
+                        getVertex(e.getTo()).asPoint())
+                )
+            );
+          }
+      
+          return CheckResult.correct();
+        }
+      
+        @DynamicTest(order = 26, feedback = "After deleting all component, JPanel Graph is not empty")
+        CheckResult checkEmpty() {
+          return TestingUtils.assertComponentCount(graph, 0);
+        }
+      
+        private Vertex getVertex(String id) {
+          return vertices
+              .stream()
+              .filter(v -> v.getId().equals(id))
+              .findFirst()
+              .orElseThrow();
+        }
+      
+        private Edge getEdge(String from, String to) {
+          return edges
+              .stream()
+              .filter(e -> e.getFrom().equals(from) && e.getTo().equals(to))
+              .findFirst()
+              .orElseThrow();
+        }
+      }
+    learner_created: false
+  - name: test/_5_GraphAlgorithmTests.java
+    visible: false
+    text: |
+      import org.assertj.swing.exception.WaitTimedOutError;
+      import org.assertj.swing.fixture.JLabelFixture;
+      import org.assertj.swing.fixture.JMenuItemFixture;
+      import org.assertj.swing.fixture.JOptionPaneFixture;
+      import org.assertj.swing.fixture.JPanelFixture;
+      import org.hyperskill.hstest.common.Utils;
+      import org.hyperskill.hstest.dynamic.DynamicTest;
+      import org.hyperskill.hstest.exception.outcomes.WrongAnswer;
+      import org.hyperskill.hstest.stage.SwingTest;
+      import org.hyperskill.hstest.testcase.CheckResult;
+      import org.hyperskill.hstest.testing.swing.SwingComponent;
+      import visualizer.MainFrame;
+      
+      import javax.swing.*;
+      
+      import java.awt.*;
+      import java.util.Objects;
+      
+      import static org.hyperskill.hstest.testcase.CheckResult.correct;
+      import static org.hyperskill.hstest.testcase.CheckResult.wrong;
+      
+      @SuppressWarnings("unused")
+      @DynamicTest()
+      public class _5_GraphAlgorithmTests extends SwingTest {
+      
+        @SwingComponent
+        private JPanelFixture graph;
+      
+        @SwingComponent(name = "Mode")
+        private JLabelFixture mode;
+      
+        @SwingComponent
+        private JLabelFixture display;
+      
+        @SwingComponent(name = "New")
+        private JMenuItemFixture newMenuItem;
+      
+        @SwingComponent(name = "Exit")
+        private JMenuItemFixture exitMenuItem;
+      
+        @SwingComponent(name = "Add a Vertex")
+        private JMenuItemFixture addVertexMenuItem;
+      
+        @SwingComponent(name = "Add an Edge")
+        private JMenuItemFixture addEdgeMenuItem;
+      
+        @SwingComponent(name = "Remove a Vertex")
+        private JMenuItemFixture removeVertexMenuItem;
+      
+        @SwingComponent(name = "Remove an Edge")
+        private JMenuItemFixture removeEdgeMenuItem;
+      
+        @SwingComponent(name = "None")
+        private JMenuItemFixture noneMenuItem;
+      
+        @SwingComponent(name = "Depth-First Search")
+        private JMenuItemFixture dfs;
+      
+        @SwingComponent(name = "Breadth-First Search")
+        private JMenuItemFixture bfs;
+      
+        @SwingComponent(name = "Dijkstra's Algorithm")
+        private JMenuItemFixture dijkstra;
+      
+        @SwingComponent(name = "Prim's Algorithm")
+        private JMenuItemFixture prim;
+      
+        public _5_GraphAlgorithmTests() {
+          super(new MainFrame());
+        }
+      
+        private CheckResult getAddVertexCheckResult(java.util.List<Vertex> vertices) {
+          var robot = getWindow().robot();
+          for (var v : vertices) {
+            robot.click(graph.target(), v.asPoint());
+      
+            JOptionPaneFixture dialog;
+            try {
+              dialog = TestingUtils.getOptionPaneFixture(getWindow().robot());
+            } catch (WaitTimedOutError e) {
+              throw new WrongAnswer(e.getMessage());
+            }
+            dialog.textBox().setText(v.getId());
+            dialog.okButton().click();
+          }
+      
+          var components = graph.target().getComponents().length;
+          var noOfVertices = vertices.size();
+          if (components != noOfVertices)
+            return wrong(String.format("%d vertices was expected to be present, but found %d", noOfVertices, components));
+          return correct();
+        }
+      
+      
+        private CheckResult getAddEdgesCheckResult(java.util.List<Edge> edges) {
+          var robot = getWindow().robot();
+          return TestingUtils.addEdge(edges, graph, robot);
+        }
+      
+        private void runAlgorithm(String source) {
+          if (!Objects.equals("Please choose a starting vertex", display.text()))
+            throw new WrongAnswer("After clicking on any algorithm, display JLabel must show - " +
+                "\"Please choose a starting vertex\"");
+          new JPanelFixture(getWindow().robot(), (JPanel) TestingUtils.getVertex(source, graph)).click();
+          display.requireText("Please wait...");
+        }
+      
+        private CheckResult getAlgorithmCheckResult(String feedback, String expected) {
+          if (!Objects.equals(display.text(), expected))
+            throw new WrongAnswer(feedback +
+                " Expected : \"" + expected + "\", but got : \"" + display.text() + "\"");
+      
+          return correct();
+        }
+      
+        private void waitForCompletion() {
+          int totalTime = 0;
+          while (Objects.equals(display.text(), "Please wait...")) {
+            if (totalTime > 60000) {
+              throw new WrongAnswer("Algorithm Running for more than 1 min");
+            }
+            Utils.sleep(100);
+            totalTime += 100;
+          }
+        }
+      
+        @DynamicTest(order = 27, feedback = "Initial Mode must be \"Add a Vertex\"")
+        CheckResult checkDefaultMode() {
+          newMenuItem.click();
+          if (mode.text()== null || !mode.text().contains("Add a Vertex"))
+            return wrong("Expected Mode \"Add a Vertex\", Got : " + mode.text());
+          return correct();
+        }
+      
+        @DynamicTest(order = 28, feedback = "Vertices could not be inserted")
+        CheckResult insertVertices() {
+          var vertices = GraphDataOne.getVertices();
+          return getAddVertexCheckResult(vertices);
+        }
+      
+        @DynamicTest(order = 29, feedback = "Edges could not be inserted")
+        CheckResult insertEdges() {
+          addEdgeMenuItem.click();
+          var edges = GraphDataOne.getEdges();
+          return getAddEdgesCheckResult(edges);
+        }
+      
+        @DynamicTest(order = 30, feedback = "Failed to run DFS Algorithm")
+        CheckResult depthFirstSearchTraversal() {
+          dfs.click();
+          runAlgorithm(GraphDataOne.getSource());
+      
+          waitForCompletion();
+      
+          return getAlgorithmCheckResult("Wrong Answer in DFS Traversal.",
+              GraphDataOne.getDFSText());
+        }
+      
+        @DynamicTest(order = 31, feedback = "Failed to run BFS Algorithm")
+        CheckResult breadthFirstSearchTraversal() {
+          bfs.click();
+          runAlgorithm(GraphDataOne.getSource());
+      
+          waitForCompletion();
+      
+          return getAlgorithmCheckResult("Wrong Answer in BFS Traversal.",
+              GraphDataOne.getBFSText());
+        }
+      
+        @DynamicTest(order = 32, feedback = "Failed to run Dijkstra's Algorithm")
+        CheckResult dijkstraShortestPathAlgorithm() {
+          dijkstra.click();
+          runAlgorithm(GraphDataOne.getSource());
+      
+          waitForCompletion();
+      
+          return getAlgorithmCheckResult("Wrong Answer in Dijkstra's Algorithm.",
+              GraphDataOne.getDijkstraText());
+        }
+      
+        @DynamicTest(order = 33, feedback = "Failed to run Prim's Algorithm")
+        CheckResult primsMinimumSpanningTree() {
+          prim.click();
+          runAlgorithm(GraphDataOne.getSource());
+      
+          waitForCompletion();
+      
+          return getAlgorithmCheckResult("Wrong Answer in Prim's Algorithm.",
+              GraphDataOne.getPrimText());
+        }
+      
+        @DynamicTest(order = 34, feedback = "Vertices could not be inserted")
+        CheckResult insertVertices2() {
+          try {
+            newMenuItem.click();
+            var vertices = GraphDataTwo.getVertices();
+            return getAddVertexCheckResult(vertices);
+          }catch(IllegalComponentStateException ex){
+            return wrong("Vertices could not be inserted");
+          }
+        }
+      
+        @DynamicTest(order = 35, feedback = "Edges could not be inserted")
+        CheckResult insertEdges2() {
+          addEdgeMenuItem.click();
+          var edges = GraphDataTwo.getEdges();
+          return getAddEdgesCheckResult(edges);
+        }
+      
+        @DynamicTest(order = 36, feedback = "Failed to run DFS Algorithm")
+        CheckResult depthFirstSearchTraversal2() {
+          dfs.click();
+          runAlgorithm(GraphDataTwo.getSource());
+      
+          waitForCompletion();
+      
+          return getAlgorithmCheckResult("Wrong Answer in DFS Traversal.",
+              GraphDataTwo.getDFSText());
+        }
+      
+        @DynamicTest(order = 37, feedback = "Failed to run BFS Algorithm")
+        CheckResult breadthFirstSearchTraversal2() {
+          bfs.click();
+          runAlgorithm(GraphDataTwo.getSource());
+      
+          waitForCompletion();
+      
+          return getAlgorithmCheckResult("Wrong Answer in BFS Traversal.",
+              GraphDataTwo.getBFSText());
+        }
+      
+        @DynamicTest(order = 38, feedback = "Failed to run Dijkstra's Algorithm")
+        CheckResult dijkstraShortestPathAlgorithm2() {
+          dijkstra.click();
+          runAlgorithm(GraphDataTwo.getSource());
+      
+          waitForCompletion();
+      
+          return getAlgorithmCheckResult("Wrong Answer in Dijkstra's Algorithm.",
+              GraphDataTwo.getDijkstraText());
+        }
+      
+        @DynamicTest(order = 39, feedback = "Failed to run Prim's Algorithm")
+        CheckResult primsMinimumSpanningTree2() {
+          prim.click();
+          runAlgorithm(GraphDataTwo.getSource());
+      
+          waitForCompletion();
+      
+          return getAlgorithmCheckResult("Wrong Answer in Prim's Algorithm.",
+              GraphDataTwo.getPrimText());
+        }
+      }
+    learner_created: false
+  - name: test/Edge.java
+    visible: false
+    text: |
+      import java.awt.*;
+      
+      public final class Edge {
+        private final String from;
+        private final String to;
+        private final int weight;
+      
+        public Edge(String from, String to, int weight) {
+          this.from = from;
+          this.to = to;
+          this.weight = weight;
+        }
+      
+        public String getFrom() {
+          return from;
+        }
+      
+        public String getTo() {
+          return to;
+        }
+      
+        public int getWeight() {
+          return weight;
+        }
+      
+        public Point getMidPoint(Point from, Point to) {
+          int x = (int) ((from.getX() + to.getX()) / 2);
+          int y = (int) ((from.getY() + to.getY()) / 2);
+          return new Point(x, y);
+        }
+      }
+    learner_created: false
+  - name: test/GraphDataOne.java
+    visible: false
+    text: |
+      import java.util.List;
+      
+      public class GraphDataOne {
+      
+        public static List<Vertex> getVertices() {
+          return List.of(
+              new Vertex(175, 359, "A"),
+              new Vertex(224, 176, "B"),
+              new Vertex(365, 363, "C"),
+              new Vertex(408, 67, "D"),
+              new Vertex(531, 235, "E"),
+              new Vertex(590, 64, "F")
+          );
+        }
+      
+        public static List<Edge> getEdges() {
+          return List.of(
+              new Edge("A", "B", 1),
+              new Edge("B", "D", 2),
+              new Edge("D", "F", 3),
+              new Edge("F", "E", 4),
+              new Edge("E", "C", 5),
+              new Edge("C", "A", 6),
+              new Edge("B", "E", 7),
+              new Edge("D", "C", 8),
+              new Edge("B", "C", 9),
+              new Edge("D", "E", 10)
+          );
+        }
+      
+        public static String getDFSText() {
+          return "DFS : A -> B -> D -> F -> E -> C";
+        }
+      
+        public static String getBFSText() {
+          return "BFS : A -> B -> C -> D -> E -> F";
+        }
+      
+        public static String getDijkstraText() {
+          return "B=1, C=6, D=3, E=8, F=6";
+        }
+      
+        public static String getPrimText() {
+          return "B=A, C=E, D=B, E=F, F=D";
+        }
+      
+        public static String getSource() {
+          return "A";
+        }
+      }
+    learner_created: false
+  - name: test/GraphDataTwo.java
+    visible: false
+    text: |
+      import java.util.List;
+      
+      public class GraphDataTwo {
+      
+        public static List<Vertex> getVertices() {
+          return List.of(
+              new Vertex(361, 54, "1"),
+              new Vertex(152, 164, "2"),
+              new Vertex(599, 155, "3"),
+              new Vertex(47, 394, "4"),
+              new Vertex(291, 392, "5"),
+              new Vertex(419, 390, "6"),
+              new Vertex(744, 392, "7")
+          );
+        }
+      
+        public static List<Edge> getEdges() {
+          return List.of(
+              new Edge("1", "2", 1),
+              new Edge("1", "3", 3),
+              new Edge("2", "4", 5),
+              new Edge("5", "2", 7),
+              new Edge("6", "3", 9),
+              new Edge("7", "3", 11)
+          );
+        }
+      
+        public static String getDFSText() {
+          return "DFS : 1 -> 2 -> 4 -> 5 -> 3 -> 6 -> 7";
+        }
+      
+        public static String getBFSText() {
+          return "BFS : 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7";
+        }
+      
+        public static String getDijkstraText() {
+          return "2=1, 3=3, 4=6, 5=8, 6=12, 7=14";
+        }
+      
+        public static String getPrimText() {
+          return "2=1, 3=1, 4=2, 5=2, 6=3, 7=3";
+        }
+      
+        public static String getSource() {
+          return "1";
+        }
+      }
+    learner_created: false
+  - name: test/TestingUtils.java
+    visible: false
+    text: |
+      import org.assertj.swing.core.Robot;
+      import org.assertj.swing.finder.JOptionPaneFinder;
+      import org.assertj.swing.fixture.JOptionPaneFixture;
+      import org.assertj.swing.fixture.JPanelFixture;
+      import org.hyperskill.hstest.exception.outcomes.WrongAnswer;
+      import org.hyperskill.hstest.stage.SwingTest;
+      import org.hyperskill.hstest.testcase.CheckResult;
+      
+      import javax.swing.*;
+      import java.awt.*;
+      import java.util.Arrays;
+      import java.util.List;
+      import java.util.NoSuchElementException;
+      
+      import static org.hyperskill.hstest.testcase.CheckResult.correct;
+      import static org.hyperskill.hstest.testcase.CheckResult.wrong;
+      
+      public class TestingUtils {
+        public static CheckResult assertComponentCount(JPanelFixture graph, int count) {
+          var length = graph.target().getComponents().length;
+          if (length != count)
+            throw new WrongAnswer(String.format(
+                "The graph panel should contain %d items, but %d items were found", count, length));
+          return correct();
+        }
+      
+      
+        public static JOptionPaneFixture getOptionPaneFixture(Robot robot) {
+          return JOptionPaneFinder
+              .findOptionPane()
+              .withTimeout(1000)
+              .using(robot);
+        }
+      
+        public static CheckResult addEdge(List<Edge> edges, JPanelFixture graph, Robot robot) {
+          for (var e : edges) {
+            new JPanelFixture(robot, (JPanel) getVertex(e.getFrom(), graph)).click();
+            new JPanelFixture(robot, (JPanel) getVertex(e.getTo(), graph)).click();
+      
+            var dialog = getOptionPaneFixture(robot);
+            dialog.textBox().setText(e.getWeight() + "");
+            dialog.okButton().click();
+          }
+      
+          var components = Arrays.stream(graph.target().getComponents())
+              .filter((i) -> i.getName()
+                  .startsWith("Edge <"))
+              .count();
+          var noOfEdges = 2 * edges.size();
+          if (components != noOfEdges)
+            return wrong(String.format("%d edges was expected to be present, but found %d", noOfEdges, components));
+      
+          return correct();
+        }
+      
+        public static Component getVertex(String id, JPanelFixture graph) {
+          for (var v : SwingTest.getAllComponents(graph.target())) {
+            if (v.getName() == null) {
+              throw new WrongAnswer("Every component must have a name. Unnamed Component Found : " + v);
+            }
+            if (v.getName().equals("Vertex " + id))
+              return v;
+          }
+          throw new NoSuchElementException();
+        }
+      }
+    learner_created: false
+  - name: test/Vertex.java
+    visible: false
+    text: |
+      import java.awt.*;
+      
+      public final class Vertex {
+        private final int x;
+        private final int y;
+        private final String id;
+      
+        public Vertex(int x, int y, String id) {
+          this.x = x;
+          this.y = y;
+          this.id = id;
+        }
+      
+        public int getX() {
+          return x;
+        }
+      
+        public int getY() {
+          return y;
+        }
+      
+      
+        public String getId() {
+          return id;
+        }
+      
+        public Point asPoint() {
+          return new Point(getX(), getY());
+        }
+      }
+    learner_created: false
+feedback_link: https://hyperskill.org/projects/207/stages/1038/implement#comment
+status: Unchecked
+record: -1

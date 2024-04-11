@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Graph-Algorithms_Visualizer.iml" filepath="$PROJECT_DIR$/.idea/modules/Graph-Algorithms_Visualizer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Graph-Algorithms Visualizer/task/Graph-Algorithms_Visualizer.Graph-Algorithms_Visualizer-task.iml" filepath="$PROJECT_DIR$/.idea/modules/Graph-Algorithms Visualizer/task/Graph-Algorithms_Visualizer.Graph-Algorithms_Visualizer-task.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Graph-Algorithms Visualizer/task/Graph-Algorithms_Visualizer.Graph-Algorithms_Visualizer-task.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Graph-Algorithms Visualizer/task/Graph-Algorithms_Visualizer.Graph-Algorithms_Visualizer-task.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Graph-Algorithms Visualizer/task/Graph-Algorithms_Visualizer.Graph-Algorithms_Visualizer-task.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Graph-Algorithms Visualizer/task/Graph-Algorithms_Visualizer.Graph-Algorithms_Visualizer-task.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/util/Graph-Algorithms_Visualizer.util.iml" filepath="$PROJECT_DIR$/.idea/modules/util/Graph-Algorithms_Visualizer.util.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/util/Graph-Algorithms_Visualizer.util.main.iml" filepath="$PROJECT_DIR$/.idea/modules/util/Graph-Algorithms_Visualizer.util.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/util/Graph-Algorithms_Visualizer.util.test.iml" filepath="$PROJECT_DIR$/.idea/modules/util/Graph-Algorithms_Visualizer.util.test.iml" />
+    </modules>
+  </component>
+</project>
