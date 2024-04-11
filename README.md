@@ -1,2 +1,4 @@
 # HyperskillProjects
-Repository for storing projects done on the Hyperskill website
+Repository for storing projects completed on the Hyperskill website.
+
+https://hyperskill.org
