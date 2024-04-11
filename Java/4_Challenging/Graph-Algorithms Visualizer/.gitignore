@@ -1,2 +1,4 @@
 # Default ignored files
 .gradle/
+Graph-Algorithms Visualizer/task/build/
+Graph-Algorithms Visualizer/task/out/
