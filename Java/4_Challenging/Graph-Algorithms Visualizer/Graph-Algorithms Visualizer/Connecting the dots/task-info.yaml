@@ -17,122 +17,13 @@ files:
       package visualizer;
       
       import javax.swing.*;
-      import java.awt.*;
-      import java.awt.event.MouseEvent;
-      import java.awt.event.MouseListener;
       
-      public class MainFrame extends JFrame implements MouseListener {
-      
-          private int mouseX = 0;
-          private int mouseY = 0;
-          private JPanel graph;
-      
+      public class MainFrame extends JFrame {
           public MainFrame() {
               setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-              setTitle("Graph-Algorithms Visualizer");
-              setSize(800, 600);
-              setLayout(null);
-              initGraph();
+              setSize(300, 300);
               setVisible(true);
-          }
-      
-          private void initGraph() {
-              graph = new JPanel();
-              graph.setName("Graph");
-              graph.setBackground(Color.BLACK);
-              graph.setLayout(null);
-              graph.setSize(800, 600);
-              graph.addMouseListener(this);
-              this.add(graph);
-          }
-      
-          private void createVertex(String vertexID) {
-              Vertex vertex = new Vertex("Vertex " + vertexID, "VertexLabel " + vertexID, vertexID);
-              // Set vertex position
-              vertex.setBounds(mouseX-25, mouseY-25, 50, 50);
-              graph.add(vertex);
-              graph.repaint();
-          }
-      
-          private String getVertexID() {
-              String vertexID = null;
-              boolean validInput = false;
-              while (!validInput) {
-                  // Prompt for vertex ID
-                  vertexID = JOptionPane.showInputDialog(null, "Enter Vertex ID (Should be 1 char):", "Vertex", JOptionPane.PLAIN_MESSAGE);
-                  if (vertexID == null) {
-                      // User clicked cancel
-                      return null;
-                  }
-                  if (vertexID.length() == 1 && (Character.isLetter(vertexID.charAt(0)) || Character.isDigit(vertexID.charAt(0)))) {
-                      validInput = true;
-                  }
-              }
-              return vertexID;
-          }
-      
-          @Override
-          public void mouseClicked(MouseEvent mouseEvent) {
-              this.mouseX = mouseEvent.getX();
-              this.mouseY = mouseEvent.getY();
-              String vertexID = getVertexID();
-              if (vertexID != null) {
-                  // Create vertex
-                  createVertex(vertexID);
-              }
-          }
-      
-          @Override
-          public void mousePressed(MouseEvent mouseEvent) {    }
-      
-          @Override
-          public void mouseReleased(MouseEvent mouseEvent) {    }
-      
-          @Override
-          public void mouseEntered(MouseEvent mouseEvent) {    }
-      
-          @Override
-          public void mouseExited(MouseEvent mouseEvent) {    }
-      }
-    learner_created: false
-  - name: src/visualizer/Vertex.java
-    visible: true
-    text: |
-      package visualizer;
-      
-      import javax.swing.*;
-      import java.awt.*;
-      
-      public class Vertex extends JPanel {
-          private final String labelName;
-          private final String labelText;
-          private final int diameter = 50;
-      
-          public Vertex(String panelName, String labelName, String labelText) {
-              this.labelName = labelName;
-              this.labelText = labelText;
-              setName(panelName);
-              setPreferredSize(new Dimension(diameter,diameter));
               setLayout(null);
-              createLabel();
-          }
-      
-          @Override
-          protected void paintComponent(Graphics g) {
-              super.paintComponent(g);
-              g.setColor(Color.BLACK);
-              g.fillRect(0,0, diameter, diameter);
-              g.setColor(Color.WHITE);
-              g.fillOval(0, 0, diameter, diameter);
-          }
-      
-          public void createLabel() {
-              JLabel label = new JLabel(labelText);
-              label.setName(this.labelName);
-              label.setHorizontalAlignment(SwingConstants.CENTER);
-              label.setVerticalAlignment(SwingConstants.CENTER);
-              label.setBounds(0, 0, diameter, diameter); // Adjust label bounds to match the panel size
-              add(label);
           }
       }
     learner_created: false
@@ -738,12 +629,56 @@ files:
           }
       }
     learner_created: false
+  - name: src/visualizer/Vertex.java
+    visible: true
+    text: |
+      package visualizer;
+      
+      import javax.swing.*;
+      import java.awt.*;
+      
+      public class Vertex extends JPanel {
+          private final String labelName;
+          private final String labelText;
+          private final int diameter = 50;
+      
+          public Vertex(String panelName, String labelName, String labelText) {
+              this.labelName = labelName;
+              this.labelText = labelText;
+              setName(panelName);
+              setPreferredSize(new Dimension(diameter,diameter));
+              setLayout(null);
+              createLabel();
+          }
+      
+          @Override
+          protected void paintComponent(Graphics g) {
+              super.paintComponent(g);
+              g.setColor(Color.BLACK);
+              g.fillRect(0,0, diameter, diameter);
+              g.setColor(Color.WHITE);
+              g.fillOval(0, 0, diameter, diameter);
+          }
+      
+          public void createLabel() {
+              JLabel label = new JLabel(labelText);
+              label.setName(this.labelName);
+              label.setHorizontalAlignment(SwingConstants.CENTER);
+              label.setVerticalAlignment(SwingConstants.CENTER);
+              label.setBounds(0, 0, diameter, diameter); // Adjust label bounds to match the panel size
+              add(label);
+          }
+      }
+    learner_created: true
   - name: src/visualizer/MODE.java
     visible: true
     learner_created: true
   - name: src/visualizer/Edge.java
     visible: true
     learner_created: true
-feedback_link: https://hyperskill.org/projects/207/stages/1034/implement#comment
-status: Failed
-record: 2
+feedback_link: https://hyperskill.org/learn/step/15626#comment
+status: Solved
+feedback:
+  message: Congratulations!
+  time: "Mon, 15 Apr 2024 08:54:56 UTC"
+record: 3
