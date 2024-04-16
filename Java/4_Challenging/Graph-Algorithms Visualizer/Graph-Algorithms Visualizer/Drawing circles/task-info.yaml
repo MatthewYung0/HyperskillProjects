@@ -228,9 +228,6 @@ files:
   - name: src/visualizer/Vertex.java
     visible: true
     learner_created: true
-feedback_link: https://hyperskill.org/learn/step/15624#comment
+feedback_link: https://hyperskill.org/projects/207/stages/1032/implement#comment
 status: Solved
-feedback:
-  message: Congratulations!
-  time: "Wed, 10 Apr 2024 10:36:35 UTC"
-record: 1
+record: 4

@@ -1,33 +1,6 @@
 type: edu
 custom_name: Removing vertices & edges
 files:
-  - name: src/visualizer/ApplicationRunner.java
-    visible: true
-    text: |
-      package visualizer;
-      
-      public class ApplicationRunner {
-          public static void main(String[] args) {
-              new MainFrame();
-          }
-      }
-    learner_created: false
-  - name: src/visualizer/MainFrame.java
-    visible: true
-    text: |-
-      package visualizer;
-      
-      import javax.swing.*;
-      
-      public class MainFrame extends JFrame {
-          public MainFrame() {
-              setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-              setSize(300, 300);
-              setVisible(true);
-              setLayout(null);
-          }
-      }
-    learner_created: false
   - name: test/RemovingVerticesAndEdgesTests.java
     visible: false
     text: |
@@ -766,6 +739,24 @@ files:
         }
       }
     learner_created: false
-feedback_link: https://hyperskill.org/learn/step/15627#comment
-status: Unchecked
-record: -1
+  - name: src/visualizer/ApplicationRunner.java
+    visible: true
+    learner_created: true
+  - name: src/visualizer/MainFrame.java
+    visible: true
+    learner_created: true
+  - name: src/visualizer/Vertex.java
+    visible: true
+    learner_created: true
+  - name: src/visualizer/Edge.java
+    visible: true
+    learner_created: true
+  - name: src/visualizer/MODE.java
+    visible: true
+    learner_created: true
+feedback_link: https://hyperskill.org/projects/207/stages/1035/implement#comment
+status: Solved
+feedback:
+  message: Congratulations!
+  time: "Tue, 16 Apr 2024 11:14:47 UTC"
+record: 3

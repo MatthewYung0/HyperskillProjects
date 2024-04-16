@@ -17,13 +17,80 @@ files:
       package visualizer;
       
       import javax.swing.*;
+      import java.awt.*;
       
       public class MainFrame extends JFrame {
           public MainFrame() {
               setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-              setSize(300, 300);
-              setVisible(true);
+              setTitle("Graph-Algorithms Visualizer");
+              setSize(800, 600);
               setLayout(null);
+              setVisible(true);
+      
+              JPanel graph = new JPanel();
+              graph.setName("Graph");
+              graph.setBackground(Color.BLACK);
+              graph.setLayout(null);
+              graph.setSize(800, 600);
+              this.add(graph);
+      
+              Vertex vertex0 = new Vertex("Vertex 0", "VertexLabel 0", "0");
+              vertex0.setBounds(0, 0, 50, 50);
+              graph.add(vertex0);
+      
+              Vertex vertex1 = new Vertex("Vertex 1", "VertexLabel 1", "1");
+              vertex1.setBounds(750, 0, 50, 50);
+              graph.add(vertex1);
+      
+              Vertex vertex2 = new Vertex("Vertex 2", "VertexLabel 2", "2");
+              vertex2.setBounds(0, 550, 50, 50);
+              graph.add(vertex2);
+      
+              Vertex vertex3 = new Vertex("Vertex 3", "VertexLabel 3", "3");
+              vertex3.setBounds(750, 550, 50, 50);
+              graph.add(vertex3);
+          }
+      
+      }
+    learner_created: false
+  - name: src/visualizer/Vertex.java
+    visible: true
+    text: |
+      package visualizer;
+      
+      import javax.swing.*;
+      import java.awt.*;
+      
+      public class Vertex extends JPanel {
+          private final String labelName;
+          private final String labelText;
+          private final int diameter = 50;
+      
+          public Vertex(String panelName, String labelName, String labelText) {
+              this.labelName = labelName;
+              this.labelText = labelText;
+              setName(panelName);
+              setPreferredSize(new Dimension(diameter,diameter));
+              setLayout(null);
+              createLabel();
+          }
+      
+          @Override
+          protected void paintComponent(Graphics g) {
+              super.paintComponent(g);
+              g.setColor(Color.BLACK);
+              g.fillRect(0,0, diameter, diameter);
+              g.setColor(Color.WHITE);
+              g.fillOval(0, 0, diameter, diameter);
+          }
+      
+          public void createLabel() {
+              JLabel label = new JLabel(labelText);
+              label.setName(this.labelName);
+              label.setHorizontalAlignment(SwingConstants.CENTER);
+              label.setVerticalAlignment(SwingConstants.CENTER);
+              label.setBounds(0, 0, diameter, diameter); // Adjust label bounds to match the panel size
+              add(label);
           }
       }
     learner_created: false
@@ -323,50 +390,6 @@ files:
           }
       }
     learner_created: false
-  - name: src/visualizer/Vertex.java
-    visible: true
-    text: |
-      package visualizer;
-      
-      import javax.swing.*;
-      import java.awt.*;
-      
-      public class Vertex extends JPanel {
-          private final String labelName;
-          private final String labelText;
-          private final int diameter = 50;
-      
-          public Vertex(String panelName, String labelName, String labelText) {
-              this.labelName = labelName;
-              this.labelText = labelText;
-              setName(panelName);
-              setPreferredSize(new Dimension(diameter,diameter));
-              setLayout(null);
-              createLabel();
-          }
-      
-          @Override
-          protected void paintComponent(Graphics g) {
-              super.paintComponent(g);
-              g.setColor(Color.BLACK);
-              g.fillRect(0,0, diameter, diameter);
-              g.setColor(Color.WHITE);
-              g.fillOval(0, 0, diameter, diameter);
-          }
-      
-          public void createLabel() {
-              JLabel label = new JLabel(labelText);
-              label.setName(this.labelName);
-              label.setHorizontalAlignment(SwingConstants.CENTER);
-              label.setVerticalAlignment(SwingConstants.CENTER);
-              label.setBounds(0, 0, diameter, diameter); // Adjust label bounds to match the panel size
-              add(label);
-          }
-      }
-    learner_created: true
-feedback_link: https://hyperskill.org/learn/step/15625#comment
+feedback_link: https://hyperskill.org/projects/207/stages/1033/implement#comment
 status: Solved
-feedback:
-  message: Congratulations!
-  time: "Wed, 10 Apr 2024 13:03:42 UTC"
-record: 2
+record: 1

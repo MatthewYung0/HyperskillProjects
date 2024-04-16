@@ -13,6 +13,7 @@ public class Edge extends JComponent {
     private final int yCord;
     private final int width;
     private final int height;
+    private JLabel label;
 
     public Edge(Vertex source, Vertex destination, String weight) {
         this.source = source;
@@ -40,13 +41,30 @@ public class Edge extends JComponent {
         g2d.drawLine(source.getCenterX() - xCord, source.getCenterY() - yCord, destination.getCenterX() - xCord, destination.getCenterY() - yCord);
     }
 
+    public Vertex getSource() {
+        return source;
+    }
+
+    public Vertex getDestination() {
+        return destination;
+    }
+
     public void createLabel(JPanel graph) {
         int xCordLabel = (source.getCenterX() + destination.getCenterX()) / 2;
         int yCordLabel = (source.getCenterY() + destination.getCenterY()) / 2;
-        JLabel label = new JLabel(weight);
+        label = new JLabel(weight);
         label.setName("EdgeLabel <" + this.sourceID + " -> " + this.destinationID + ">");
         label.setFont(label.getFont().deriveFont(16f));
         label.setBounds(xCordLabel + 5, yCordLabel + 5, 50, 20);
         graph.add(label);
+    }
+
+    public void removeLabel(JPanel graph) {
+        if (label != null) {
+            graph.remove(label);
+            graph.revalidate();
+            graph.repaint();
+            label = null; // Clear the reference
+        }
     }
 }
