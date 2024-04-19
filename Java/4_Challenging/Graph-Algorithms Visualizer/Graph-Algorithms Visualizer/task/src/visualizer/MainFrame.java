@@ -28,7 +28,8 @@ public class MainFrame extends JFrame {
     private Vertex selectedVertex2 = null;
     private Vertex startingVertex = null;
     private final ArrayList<String> vertexesVisited = new ArrayList<>();
-    private final Map<Vertex, Integer> shortestDistances = new HashMap<>();
+    private final Map<Vertex, Integer> dijkstraMap = new HashMap<>();
+    private final Map<Vertex, Edge> minSpanningTree = new HashMap<>();
 
     public MainFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -87,12 +88,15 @@ public class MainFrame extends JFrame {
         String dfsString = "Depth-First Search";
         String bfsString = "Breadth-First Search";
         String dijkString = "Dijkstra's Algorithm";
+        String primString = "Prim's Algorithm";
         JMenuItem dfs = new JMenuItem(dfsString);
         JMenuItem bfs = new JMenuItem(bfsString);
         JMenuItem dij = new JMenuItem(dijkString);
+        JMenuItem prm = new JMenuItem(primString);
         dfs.setName(dfsString);
         bfs.setName(bfsString);
         dij.setName(dijkString);
+        prm.setName(primString);
         ActionListener algo = algoEvent -> {
             mode = MODE.NONE;
             setCurrentOption(mode);
@@ -115,6 +119,8 @@ public class MainFrame extends JFrame {
                         runBFS(startingVertex);
                     } else if (algoName.equals(dijkString)) {
                         runDij(startingVertex);
+                    } else {
+                        runPri(startingVertex);
                     }
                     graph.removeMouseListener(this);
                 }
@@ -124,9 +130,11 @@ public class MainFrame extends JFrame {
         dfs.addActionListener(algo);
         bfs.addActionListener(algo);
         dij.addActionListener(algo);
+        prm.addActionListener(algo);
         algoMenu.add(dfs);
         algoMenu.add(bfs);
         algoMenu.add(dij);
+        algoMenu.add(prm);
     }
 
     private void initFileMenuItems(JMenu fileMenu) {
@@ -181,15 +189,57 @@ public class MainFrame extends JFrame {
         repaint();
     }
 
+    private void runPri(Vertex startVertex) {
+        if (startVertex == null) {
+            return;
+        }
+        // Initialize variables
+        Set<Vertex> visited = new HashSet<>();
+        PriorityQueue<Edge> minHeap = new PriorityQueue<>(Comparator.comparingInt(edge -> Integer.parseInt(edge.getWeight())));
+        // Add startVertex to visited set
+        visited.add(startVertex);
+        // Add all edges incident to startVertex to minHeap
+        for (Component component : graph.getComponents()) {
+            if (component instanceof Edge edge && edge.getSource() == startVertex) {
+                minHeap.offer(edge);
+            }
+        }
+        // Prim's algorithm
+        while (!minHeap.isEmpty()) {
+            // Extract the edge with the minimum weight
+            Edge minEdge = minHeap.poll();
+            // Get the destination vertex of the minimum edge
+            Vertex destVertex = minEdge.getDestination();
+            // If the destination vertex is already visited, continue to the next iteration
+            if (visited.contains(destVertex)) {
+                continue;
+            }
+            // Add the destination vertex to the visited set
+            visited.add(destVertex);
+            // Add the edge to the minimum spanning tree if it's not the starting vertex
+            if (!destVertex.equals(startVertex)) {
+                minSpanningTree.put(destVertex, minEdge);
+            }
+            // Add all edges incident to the destination vertex to minHeap
+            for (Component component : graph.getComponents()) {
+                if (component instanceof Edge edge && edge.getSource() == destVertex && !visited.contains(edge.getDestination())) {
+                    minHeap.offer(edge);
+                }
+            }
+        }
+        Timer timer = getTimer("PRI : ");
+        timer.start();
+    }
+
     private void runDij(Vertex startVertex) {
         for (Component component : graph.getComponents()) {
             if (component instanceof Vertex) {
-                shortestDistances.put((Vertex) component, Integer.MAX_VALUE);
+                dijkstraMap.put((Vertex) component, Integer.MAX_VALUE);
             }
         }
-        shortestDistances.put(startVertex, 0);
+        dijkstraMap.put(startVertex, 0);
         // Initialize priority queue for vertices based on their distances
-        PriorityQueue<Vertex> pq = new PriorityQueue<>(Comparator.comparingInt(shortestDistances::get));
+        PriorityQueue<Vertex> pq = new PriorityQueue<>(Comparator.comparingInt(dijkstraMap::get));
         pq.offer(startVertex);
         // Dijkstra's algorithm
         while (!pq.isEmpty()) {
@@ -198,15 +248,15 @@ public class MainFrame extends JFrame {
                 if (component instanceof Edge edge && edge.getSource() == u) {
                     Vertex v = edge.getDestination();
                     int weight = Integer.parseInt(edge.getWeight());
-                    int newDistance = shortestDistances.get(u) + weight;
-                    if (newDistance < shortestDistances.get(v)) {
-                        shortestDistances.put(v, newDistance);
+                    int newDistance = dijkstraMap.get(u) + weight;
+                    if (newDistance < dijkstraMap.get(v)) {
+                        dijkstraMap.put(v, newDistance);
                         pq.offer(v);
                     }
                 }
             }
         }
-        Timer timer = getTimer("");
+        Timer timer = getTimer("DIJ : ");
         timer.start();
     }
 
@@ -216,19 +266,15 @@ public class MainFrame extends JFrame {
         }
         // Initialize a queue for BFS traversal
         Queue<Vertex> queue = new LinkedList<>();
-
         // Mark the start vertex as visited and enqueue it
         startVertex.setIsVisited(true);
         queue.add(startVertex);
-
         // Perform BFS traversal
         while (!queue.isEmpty()) {
             // Dequeue a vertex from the queue
             Vertex currentVertex = queue.poll();
-
             // Perform any necessary operations on the current vertex
             vertexesVisited.add(currentVertex.getVertexText());
-
             // Get all adjacent vertices of the current vertex
             for (Component component : graph.getComponents()) {
                 if (component instanceof Edge edge) {
@@ -280,7 +326,7 @@ public class MainFrame extends JFrame {
 
     private Timer getTimer(String algorithmName) {
         Timer timer = new Timer(2000, e -> {
-            if ((algorithmName.equals("BFS : ") || algorithmName.equals("DFS: "))) {
+            if ((algorithmName.equals("BFS : ") || algorithmName.equals("DFS : "))) {
                 StringBuilder result = new StringBuilder(algorithmName);
                 for (int i = 0; i < vertexesVisited.size(); i++) {
                     if (i != vertexesVisited.size() - 1) {
@@ -291,11 +337,11 @@ public class MainFrame extends JFrame {
                 }
                 algoLabel.setText(result.toString());
                 refreshJFrame();
-            } else {
-                shortestDistances.entrySet().removeIf(entry -> entry.getValue() == 0);
+            } else if (algorithmName.equals("DIJ : ")) {
+                dijkstraMap.entrySet().removeIf(entry -> entry.getValue() == 0);
                 // Sort the map by key alphanumerically
                 TreeMap<Vertex, Integer> sortedDistances = new TreeMap<>(Comparator.comparing(Vertex::getVertexText));
-                sortedDistances.putAll(shortestDistances);
+                sortedDistances.putAll(dijkstraMap);
                 // Construct the path string
                 StringBuilder pathBuilder = new StringBuilder();
                 for (Map.Entry<Vertex, Integer> entry : sortedDistances.entrySet()) {
@@ -308,8 +354,22 @@ public class MainFrame extends JFrame {
                 }
                 algoLabel.setText(pathString);
                 refreshJFrame();
+            } else {
+                TreeMap<Vertex, Edge> sortedTree = new TreeMap<>(Comparator.comparing(Vertex::getVertexText));
+                sortedTree.putAll(minSpanningTree);
+                // Construct the display string
+                StringBuilder display = new StringBuilder();
+                for (Map.Entry<Vertex, Edge> entry : sortedTree.entrySet()) {
+                    display.append(entry.getKey().getVertexText()).append("=").append(entry.getValue().getSource().getVertexText()).append(", ");
+                }
+                // Remove the trailing ", "
+                String displayString = display.toString();
+                if (!displayString.isEmpty()) {
+                    displayString = displayString.substring(0, displayString.length() - 2);
+                }
+                algoLabel.setText(displayString);
+                refreshJFrame();
             }
-
         });
         timer.setRepeats(false); // Only run once
         return timer;
@@ -319,7 +379,8 @@ public class MainFrame extends JFrame {
         algoLabel.setText("");
         refreshJFrame();
         vertexesVisited.clear();
-        shortestDistances.clear();
+        dijkstraMap.clear();
+        minSpanningTree.clear();
     }
 
     private void resetIsVisited() {
