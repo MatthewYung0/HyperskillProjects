@@ -111,7 +111,7 @@ enum ComponentType {
 }
 
 @SuppressWarnings("unused")
-public class GraphTraversalAlgorithmTests extends SwingTest {
+public class ShortestPathAlgorithmTests extends SwingTest {
 
     @SwingComponent(name = "Graph")
     private JPanelFixture graph;
@@ -146,10 +146,13 @@ public class GraphTraversalAlgorithmTests extends SwingTest {
     @SwingComponent(name = "Depth-First Search")
     private JMenuItemFixture depthFirstSearch;
 
+    @SwingComponent(name = "Dijkstra's Algorithm")
+    private JMenuItemFixture dijkstraAlgorithm;
+
     @SwingComponent(name = "Display")
     private JLabelFixture display;
 
-    public GraphTraversalAlgorithmTests() {
+    public ShortestPathAlgorithmTests() {
         super(new MainFrame());
     }
 
@@ -442,8 +445,7 @@ public class GraphTraversalAlgorithmTests extends SwingTest {
         checkVertexLabelCount(vertices);
         checkEdgeLabelCount(edges);
 
-        runAlgorithm(data, depthFirstSearch, data.getDFSText());
-        runAlgorithm(data, breadthFirstSearch, data.getBFSText());
+        runAlgorithm(data, dijkstraAlgorithm, data.getDijkstraText());
 
         newMenuItem.click();
 
@@ -453,7 +455,7 @@ public class GraphTraversalAlgorithmTests extends SwingTest {
     private void runAlgorithm(GraphData data, JMenuItemFixture algo, String answer) {
         algo.click();
 
-        if (display.text() == null || !display.text().contains("Please choose a starting vertex"))
+        if (!display.text().contains("Please choose a starting vertex"))
             throw new WrongAnswer("Display label should show \"Please choose a starting vertex\" if an algorithm is selected for execution.");
 
         getWindow().robot().click(getVertex(data.getSource()).orElseThrow(() -> new WrongAnswer("Vertex disappeared after creation.")));
@@ -461,19 +463,16 @@ public class GraphTraversalAlgorithmTests extends SwingTest {
         if (!modeText.text().matches(".*None.*"))
             throw new WrongAnswer("Mode after selecting an algorithm should be \"None\".");
 
-        if (display.text() == null || !display.text().contains("Please wait..."))
+        if (!display.text().contains("Please wait..."))
             throw new WrongAnswer("Display label should show \"Please wait...\" after selecting source / while the algorithm is executing.");
 
         int totalTime = 0;
         while (display.text().contains("Please wait...")) {
-          if (totalTime > 60000) {
-            throw new WrongAnswer("Algorithm Running for more than 1 min");
-          }
-          Utils.sleep(100);
-          totalTime += 100;
-          if (display.text() == null)
-              throw new WrongAnswer("Display label should show \"Please wait...\" after selecting source / while the algorithm is executing.");
-
+            if (totalTime > 60000) {
+                throw new WrongAnswer("Algorithm Running for more than 1 min");
+            }
+            Utils.sleep(100);
+            totalTime += 100;
         }
 
         if (!display.text().contains(answer))

@@ -42,6 +42,11 @@ public class GraphDataOne implements GraphData {
     }
 
     @Override
+    public String getDijkstraText() {
+        return "B=1, C=6, D=3, E=8, F=6";
+    }
+
+    @Override
     public String getSource() {
         return "A";
     }

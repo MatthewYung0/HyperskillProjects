@@ -9,5 +9,7 @@ public interface GraphData {
 
     String getBFSText();
 
+    String getDijkstraText();
+
     String getSource();
 }

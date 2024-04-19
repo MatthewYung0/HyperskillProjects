@@ -1,15 +1,12 @@
 package visualizer;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Queue;
+import java.util.*;
 import java.util.LinkedList;
 
 public class MainFrame extends JFrame {
@@ -30,7 +27,8 @@ public class MainFrame extends JFrame {
     private Vertex selectedVertex1 = null;
     private Vertex selectedVertex2 = null;
     private Vertex startingVertex = null;
-    private ArrayList<String> vertexesVisited = new ArrayList<>();
+    private final ArrayList<String> vertexesVisited = new ArrayList<>();
+    private final Map<Vertex, Integer> shortestDistances = new HashMap<>();
 
     public MainFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -88,11 +86,13 @@ public class MainFrame extends JFrame {
     private void initAlgoMenuItems(JMenu algoMenu) {
         String dfsString = "Depth-First Search";
         String bfsString = "Breadth-First Search";
+        String dijkString = "Dijkstra's Algorithm";
         JMenuItem dfs = new JMenuItem(dfsString);
         JMenuItem bfs = new JMenuItem(bfsString);
+        JMenuItem dij = new JMenuItem(dijkString);
         dfs.setName(dfsString);
         bfs.setName(bfsString);
-
+        dij.setName(dijkString);
         ActionListener algo = algoEvent -> {
             mode = MODE.NONE;
             setCurrentOption(mode);
@@ -106,10 +106,15 @@ public class MainFrame extends JFrame {
                     mouseX = mouseEvent.getX();
                     mouseY = mouseEvent.getY();
                     startingVertex = (Vertex) getComponent(Vertex.class);
+                    vertexesVisited.clear();
+                    algoLabel.setText("Please wait...");
+                    refreshJFrame();
                     if (algoName.equals(dfsString)) {
                         runDFS(startingVertex);
                     } else if (algoName.equals(bfsString)) {
                         runBFS(startingVertex);
+                    } else if (algoName.equals(dijkString)) {
+                        runDij(startingVertex);
                     }
                     graph.removeMouseListener(this);
                 }
@@ -118,8 +123,10 @@ public class MainFrame extends JFrame {
         };
         dfs.addActionListener(algo);
         bfs.addActionListener(algo);
+        dij.addActionListener(algo);
         algoMenu.add(dfs);
         algoMenu.add(bfs);
+        algoMenu.add(dij);
     }
 
     private void initFileMenuItems(JMenu fileMenu) {
@@ -174,17 +181,39 @@ public class MainFrame extends JFrame {
         repaint();
     }
 
-    private void runBFS(Vertex startVertex) {
-        algoLabel.setText("Please wait...");
-        refreshJFrame();
+    private void runDij(Vertex startVertex) {
+        for (Component component : graph.getComponents()) {
+            if (component instanceof Vertex) {
+                shortestDistances.put((Vertex) component, Integer.MAX_VALUE);
+            }
+        }
+        shortestDistances.put(startVertex, 0);
+        // Initialize priority queue for vertices based on their distances
+        PriorityQueue<Vertex> pq = new PriorityQueue<>(Comparator.comparingInt(shortestDistances::get));
+        pq.offer(startVertex);
+        // Dijkstra's algorithm
+        while (!pq.isEmpty()) {
+            Vertex u = pq.poll();
+            for (Component component : graph.getComponents()) {
+                if (component instanceof Edge edge && edge.getSource() == u) {
+                    Vertex v = edge.getDestination();
+                    int weight = Integer.parseInt(edge.getWeight());
+                    int newDistance = shortestDistances.get(u) + weight;
+                    if (newDistance < shortestDistances.get(v)) {
+                        shortestDistances.put(v, newDistance);
+                        pq.offer(v);
+                    }
+                }
+            }
+        }
+        Timer timer = getTimer("");
+        timer.start();
+    }
 
+    private void runBFS(Vertex startVertex) {
         if (startVertex == null) {
             return;
         }
-
-        // Clear previously visited vertices
-        vertexesVisited.clear();
-
         // Initialize a queue for BFS traversal
         Queue<Vertex> queue = new LinkedList<>();
 
@@ -219,19 +248,13 @@ public class MainFrame extends JFrame {
     }
 
     private void runDFS(Vertex startVertex) {
-        algoLabel.setText("Please wait...");
-        refreshJFrame();
         if (startVertex == null) {
             return;
         }
         // Mark the current vertex as visited
         startVertex.setIsVisited(true);
-        graph.revalidate();
-        graph.repaint();
-
         // Perform any necessary operations on the current vertex (e.g., display or process it)
         vertexesVisited.add(startVertex.getVertexText());
-
         // Get all adjacent edges of the current vertex and sort them by weight
         ArrayList<Edge> adjacentEdges = new ArrayList<>();
         for (Component component : graph.getComponents()) {
@@ -242,7 +265,6 @@ public class MainFrame extends JFrame {
             }
         }
         adjacentEdges.sort(Comparator.comparingInt(e -> Integer.parseInt(e.getWeight())));
-
         // Traverse adjacent vertices in ascending order of edge weights
         for (Edge edge : adjacentEdges) {
             Vertex destinationVertex = edge.getDestination();
@@ -258,16 +280,36 @@ public class MainFrame extends JFrame {
 
     private Timer getTimer(String algorithmName) {
         Timer timer = new Timer(2000, e -> {
-            StringBuilder result = new StringBuilder(algorithmName);
-            for (int i = 0; i < vertexesVisited.size(); i++) {
-                if (i != vertexesVisited.size() - 1) {
-                    result.append(vertexesVisited.get(i)).append(" -> ");
-                } else {
-                    result.append(vertexesVisited.get(i));
+            if ((algorithmName.equals("BFS : ") || algorithmName.equals("DFS: "))) {
+                StringBuilder result = new StringBuilder(algorithmName);
+                for (int i = 0; i < vertexesVisited.size(); i++) {
+                    if (i != vertexesVisited.size() - 1) {
+                        result.append(vertexesVisited.get(i)).append(" -> ");
+                    } else {
+                        result.append(vertexesVisited.get(i));
+                    }
                 }
+                algoLabel.setText(result.toString());
+                refreshJFrame();
+            } else {
+                shortestDistances.entrySet().removeIf(entry -> entry.getValue() == 0);
+                // Sort the map by key alphanumerically
+                TreeMap<Vertex, Integer> sortedDistances = new TreeMap<>(Comparator.comparing(Vertex::getVertexText));
+                sortedDistances.putAll(shortestDistances);
+                // Construct the path string
+                StringBuilder pathBuilder = new StringBuilder();
+                for (Map.Entry<Vertex, Integer> entry : sortedDistances.entrySet()) {
+                    pathBuilder.append(entry.getKey().getVertexText()).append("=").append(entry.getValue()).append(", ");
+                }
+                // Remove the trailing ", "
+                String pathString = pathBuilder.toString();
+                if (!pathString.isEmpty()) {
+                    pathString = pathString.substring(0, pathString.length() - 2);
+                }
+                algoLabel.setText(pathString);
+                refreshJFrame();
             }
-            algoLabel.setText(result.toString());
-            refreshJFrame();
+
         });
         timer.setRepeats(false); // Only run once
         return timer;
@@ -277,6 +319,7 @@ public class MainFrame extends JFrame {
         algoLabel.setText("");
         refreshJFrame();
         vertexesVisited.clear();
+        shortestDistances.clear();
     }
 
     private void resetIsVisited() {
@@ -490,5 +533,4 @@ public class MainFrame extends JFrame {
             removeVertex(clickedVertex);
         }
     }
-
 }

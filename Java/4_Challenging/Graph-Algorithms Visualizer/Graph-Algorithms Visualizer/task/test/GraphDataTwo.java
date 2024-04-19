@@ -39,6 +39,11 @@ public class GraphDataTwo implements GraphData {
     }
 
     @Override
+    public String getDijkstraText() {
+        return "2=1, 3=3, 4=6, 5=8, 6=12, 7=14";
+    }
+
+    @Override
     public String getSource() {
         return "1";
     }
