@@ -14,6 +14,7 @@ public class Edge extends JComponent {
     private final int width;
     private final int height;
     private JLabel label;
+    private Color edgeColour;
 
     public Edge(Vertex source, Vertex destination, String weight) {
         this.source = source;
@@ -39,6 +40,10 @@ public class Edge extends JComponent {
         float thickness = 4.0f;
         g2d.setStroke(new BasicStroke(thickness));
         g2d.drawLine(source.getCenterX() - xCord, source.getCenterY() - yCord, destination.getCenterX() - xCord, destination.getCenterY() - yCord);
+    }
+
+    public String getWeight() {
+        return this.weight;
     }
 
     public Vertex getSource() {

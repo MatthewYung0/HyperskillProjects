@@ -9,12 +9,15 @@ public class Vertex extends JPanel {
     private final int XCenterCord;
     private final int YCenterCord;
     private final int diameter = 50;
+    private boolean isVisited = false;
+    private Color vertexColour;
 
     public Vertex(int XCord, int YCord) {
         this.XCenterCord = XCord;
         this.YCenterCord = YCord;
         this.labelName = null;
         this.labelText = null;
+        this.vertexColour = Color.BLACK; // Default color
     }
 
     public Vertex(String panelName, String labelName, String labelText, int XCord, int YCord) {
@@ -22,10 +25,26 @@ public class Vertex extends JPanel {
         this.labelText = labelText;
         this.XCenterCord = XCord;
         this.YCenterCord = YCord;
+        this.vertexColour = Color.BLACK; // Default color
         setName(panelName);
         setPreferredSize(new Dimension(diameter,diameter));
         setLayout(null);
         createLabel();
+    }
+
+    public boolean getIsVisited() { return isVisited; }
+
+    public void setIsVisited(boolean isVisited) {
+        this.isVisited = isVisited;
+        if (!this.isVisited) {
+            setColourVisited();
+        } else {
+            resetColour();
+        }
+    }
+
+    public String getVertexText() {
+        return this.labelText;
     }
 
     public int getCenterX() {
@@ -43,6 +62,16 @@ public class Vertex extends JPanel {
         g.fillRect(0,0, diameter, diameter);
         g.setColor(Color.BLACK);
         g.fillOval(0, 0, diameter, diameter);
+    }
+
+    private void resetColour() {
+        vertexColour = Color.BLACK; // Reset to default color
+        repaint(); // Repaint the panel to reflect the color change
+    }
+
+    private void setColourVisited() {
+        vertexColour = Color.RED; // Set color for visited vertex
+        repaint(); // Repaint the panel to reflect the color change
     }
 
     public void createLabel() {
