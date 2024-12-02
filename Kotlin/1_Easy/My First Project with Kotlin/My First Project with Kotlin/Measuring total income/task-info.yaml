@@ -8,5 +8,8 @@ files:
     learner_created: false
 feedback_link: https://hyperskill.org/learn/step/51234#comment
 check_profile: hyperskill_java
-status: Unchecked
-record: -1
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: "Mon, 02 Dec 2024 08:34:46 UTC"
+record: 2
