@@ -1,0 +1,15 @@
+type: remote_edu
+files:
+  - name: src/first_project/Main.kt
+    visible: true
+    learner_created: false
+  - name: test/MyFirstProjectTest.java
+    visible: false
+    learner_created: false
+feedback_link: https://hyperskill.org/learn/step/51233#comment
+check_profile: hyperskill_java
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: "Mon, 02 Dec 2024 07:41:02 UTC"
+record: 1

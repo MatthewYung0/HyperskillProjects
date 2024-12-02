@@ -1,0 +1,12 @@
+type: remote_edu
+files:
+  - name: src/first_project/Main.kt
+    visible: true
+    learner_created: false
+  - name: test/MyFirstProjectTest.java
+    visible: false
+    learner_created: false
+feedback_link: https://hyperskill.org/learn/step/51234#comment
+check_profile: hyperskill_java
+status: Unchecked
+record: -1
